@@ -11,6 +11,7 @@ close all;
 clear;
 clc;
 
+
          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
          % Program to caculate the signal in particle detectors %
          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -51,8 +52,8 @@ BField = 0.0; % Magnetic field (orthogonal+outgoing from 2D geometry) [T]
 T = 300; % Sensor temperature [Kelvin]
 
 mu_e   = 140*(T/300)^(-2.4); % Electron mobility [um^2/(V*ns)] [140 Silicon, 180 Diamond, 850 GaAs]
-RH_e   = 1;    % Relative Hall electron mobility [1 Silicon, 1 Diamond]
-vs_e   = 110;  % Saturation velocity of the electrons [um/ns] [110 Silicon, 260 Diamond, 200 GaAs]
+RH_e   = 1;   % Relative Hall electron mobility [1 Silicon, 1 Diamond]
+vs_e   = 110; % Saturation velocity of the electrons [um/ns] [110 Silicon, 260 Diamond, 200 GaAs]
 beta_e = 0.0257*T^0.66; % Exponent for the electric field dependence of the mobility
 
 mu_h   = 48*(T/300)^(-2.2); % Hole mobility in [um^2/(V*ns)] [45 Silicon, 120 Diamond, 45 AsGa]
