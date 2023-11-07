@@ -262,6 +262,7 @@ surf(xx,yy,EfieldNorm,'EdgeColor','none','FaceColor','interp');
 title('Field magnitude');
 xlabel('X [\mum]');
 ylabel('Z [\mum]');
+zlabel('|E| [V/\mum]');
 
 
 ItFigIn = ItFigIn + 1;
