@@ -22,7 +22,7 @@ clc;
 BiasV = -200; % Sensor backplane voltage [V]
 
 Fluence = 0; % Irradiation fluence [10^16 1MeV n.eq./cm^2]
-               % 1/tau = c*Fluence/(1 + c*Fluence/t), extracted from fit to data [ns^-1]
+             % 1/tau = c*Fluence/(1 + c*Fluence/t), extracted from fit to data [ns^-1]
 ce = 5.36;
 te = 0.8295;
 ch = 3.361;
@@ -39,7 +39,7 @@ PitchY =  50; % Pitch along Y [um] (for 3D geometry)
 
 qe       = -1.6e-19; % Electron charge [Coulomb]
 eps0     = 8.85e-18; % Vacuum permittivity [F/um]
-epsR     = 12.85;    % Relative permittivity [11.7 Silicon, 5.7 Diamond, 12.85 GaAs]
+epsR     = 11.7;     % Relative permittivity [11.7 Silicon, 5.7 Diamond, 12.85 GaAs]
 dN_dPhi  = 35;       % dN/dPhi extracted from data [#/(um^3 10^16)]
 DeplVnoF = 10;       % Full depletion voltage for non irradiated sensors [V]
 DeplV    = qe*Bulk^2/(2*epsR*eps0)*dN_dPhi*Fluence - DeplVnoF; % Sensor full depletion voltage [V]
