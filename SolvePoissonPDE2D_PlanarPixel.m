@@ -216,14 +216,14 @@ ylabel('Z [\mum]');
 subplot(1,2,2);
 colormap jet;
 
-x = -Pitch:ReSampleFine:Pitch;
-y = 0:ReSampleFine:Bulk * 3/2;
-[FineMeshX,FineMeshY] = meshgrid(x,y);
+xfine = -Pitch:ReSampleFine:Pitch;
+yfine = 0:ReSampleFine:Bulk * 3/2;
+[FineMeshX,FineMeshY] = meshgrid(xfine,yfine);
 FineQuery = [FineMeshX(:),FineMeshY(:)]';
 
-x = -Pitch:ReSampleCoarse:Pitch;
-y = 0:ReSampleCoarse:Bulk * 3/2;
-[CoarseMeshX,CoarseMeshY] = meshgrid(x,y);
+xcoarse = -Pitch:ReSampleCoarse:Pitch;
+ycoarse = 0:ReSampleCoarse:Bulk * 3/2;
+[CoarseMeshX,CoarseMeshY] = meshgrid(xcoarse,ycoarse);
 CoarseQuery = [CoarseMeshX(:),CoarseMeshY(:)]';
 
 
@@ -233,13 +233,10 @@ CoarseQuery = [CoarseMeshX(:),CoarseMeshY(:)]';
 interp = interpolateSolution(Potential,FineQuery);
 interp = reshape(interp,size(FineMeshX));
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
-% Evaluate the gradient %
-%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Evaluate the gradient field %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [gradx,grady] = evaluateGradient(Potential,CoarseQuery);
-
-
 contour(FineMeshX,FineMeshY,interp,ContLevel);
 hold on;
 quiver(CoarseMeshX(:),CoarseMeshY(:),gradx,grady,MagnVector);
@@ -247,6 +244,25 @@ hold off;
 title('Potential and its gradient');
 xlabel('X [\mum]');
 ylabel('Z [\mum]');
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Evaluate the gradient magnitude %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[gradx,grady] = evaluateGradient(Potential,FineQuery);
+gradx = reshape(gradx,length(xfine),length(yfine));
+grady = reshape(grady,length(xfine),length(yfine));
+EfieldNorm = sqrt(gradx.^2 + grady.^2);
+xx = reshape(FineQuery(1,:),length(xfine),length(yfine));
+yy = reshape(FineQuery(2,:),length(xfine),length(yfine));
+
+ItFigIn = ItFigIn + 1;
+figure(ItFigIn);
+surf(xx,yy,EfieldNorm,'EdgeColor','none','FaceColor','interp');
+title('Field magnitude');
+xlabel('X [\mum]');
+ylabel('Z [\mum]');
+
 
 ItFigIn = ItFigIn + 1;
 figure(ItFigIn);

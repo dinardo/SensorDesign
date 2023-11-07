@@ -19,27 +19,27 @@ clc;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-BiasV = -100; % Sensor backplane voltage [V]
+BiasV = -200; % Sensor backplane voltage [V]
 
-Fluence = 0.0; % Irradiation fluence [10^16 1MeV n.eq./cm^2]
+Fluence = 0; % Irradiation fluence [10^16 1MeV n.eq./cm^2]
                % 1/tau = c*Fluence/(1 + c*Fluence/t), extracted from fit to data [ns^-1]
 ce = 5.36;
 te = 0.8295;
 ch = 3.361;
 th = 107.6;
-scale = 1e9;%2.7; % Scale factor to correct the data life-time [tuned on ATLAS results]
+scale = 2.7; % Scale factor to correct the data life-time [tuned on ATLAS results]
 TauBe = scale * (1 + ce*Fluence/te)/(ce*Fluence); % Life-time on the backplane side [ns]
 TauSe = scale * (1 + ce*Fluence/te)/(ce*Fluence); % Life-time on the strip side [ns]
 TauBh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the backplane side [ns]
 TauSh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the strip side [ns]
 
 Bulk   = 100; % Bulk thickness [um]
-PitchX = 100; % Pitch along X [um] (for 2D&3D geometry)
-PitchY = 150; % Pitch along Y [um] (for 3D geometry)
+PitchX = 500; % Pitch along X [um] (for 2D&3D geometry)
+PitchY =  50; % Pitch along Y [um] (for 3D geometry)
 
 qe       = -1.6e-19; % Electron charge [Coulomb]
 eps0     = 8.85e-18; % Vacuum permittivity [F/um]
-epsR     = 11.7;     % Relative permittivity [11.7 Silicon, 5.7 Diamond]
+epsR     = 12.85;    % Relative permittivity [11.7 Silicon, 5.7 Diamond, 12.85 GaAs]
 dN_dPhi  = 35;       % dN/dPhi extracted from data [#/(um^3 10^16)]
 DeplVnoF = 10;       % Full depletion voltage for non irradiated sensors [V]
 DeplV    = qe*Bulk^2/(2*epsR*eps0)*dN_dPhi*Fluence - DeplVnoF; % Sensor full depletion voltage [V]
@@ -47,7 +47,7 @@ rho      = 2*DeplV*epsR*eps0/(qe*Bulk^2); % Bulk doping concentration [#/um^3]
 
 BField = 0.0; % Magnetic field (orthogonal+outgoing from 2D geometry) [T]
 
-T = 263; % Sensor temperature [Kelvin]
+T = 300; % Sensor temperature [Kelvin]
 
 mu_e   = 140*(T/300)^(-2.4); % Electron mobility [um^2/(V*ns)] [140 Silicon, 180 Diamond]
 RH_e   = 1;    % Relative Hall electron mobility [1 Silicon, 1 Diamond]
