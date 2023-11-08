@@ -213,6 +213,9 @@ title('Potential');
 xlabel('X [\mum]');
 ylabel('Z [\mum]');
 
+subplot(1,2,2);
+colormap jet;
+
 
 %%%%%%%%%%%%%%%%%
 % Redefine mesh %
@@ -240,8 +243,6 @@ interp = reshape(interp,size(FineMeshX));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 [gradx,grady] = evaluateGradient(Potential,CoarseQuery);
 contour(FineMeshX,FineMeshY,interp,ContLevel);
-subplot(1,2,2);
-colormap jet;
 hold on;
 quiver(CoarseMeshX(:),CoarseMeshY(:),gradx,grady,MagnVector);
 hold off;
