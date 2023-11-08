@@ -34,14 +34,14 @@ TauSe = scale * (1 + ce*Fluence/te)/(ce*Fluence); % Life-time on the strip side 
 TauBh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the backplane side [ns]
 TauSh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the strip side [ns]
 
-Bulk   = 100; % Bulk thickness [um]
-PitchX = 500; % Pitch along X [um] (for 2D&3D geometry)
+Bulk   = 500; % Bulk thickness [um]
+PitchX = 100; % Pitch along X [um] (for 2D&3D geometry)
 PitchY =  50; % Pitch along Y [um] (for 3D geometry)
 
 qe       = -1.6e-19; % Electron charge [Coulomb]
 eps0     = 8.85e-18; % Vacuum permittivity [F/um]
 epsR     = 12.85;    % Relative permittivity [11.7 Silicon, 5.7 Diamond, 12.85 GaAs]
-epsRSiO2 = 3.9;
+epsRSiO2 = 3.9;      % Relative permittivity SiO2
 dN_dPhi  = 35;       % dN/dPhi extracted from data [#/(um^3 10^16)]
 DeplVnoF = 60;       % Full depletion voltage for non irradiated sensors [V]
 DeplV    = qe*Bulk^2/(2*epsR*eps0)*dN_dPhi*Fluence - DeplVnoF; % Sensor full depletion voltage [V]
@@ -101,8 +101,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Compute the potentials %
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-[TotalPot,  ~,       ~, ItFig] = SolvePoissonPDE2D_PlanarPixel(Bulk,PitchX,BiasV,0,0,epsR,rho*qe/eps0,XQ,ItFig);
-[WeightPot, Sq2D, xq2D, ItFig] = SolvePoissonPDE2D_PlanarPixel(Bulk,PitchX,0,0,1,epsR,0,XQ,ItFig);
+[TotalPot,  ~,       ~, ItFig] = SolvePoissonPDE2D_PlanarPixel_PT(Bulk,PitchX,BiasV,0,0,epsR,epsRSiO2,rho*qe/eps0,XQ,ItFig);
+[WeightPot, Sq2D, xq2D, ItFig] = SolvePoissonPDE2D_PlanarPixel_PT(Bulk,PitchX,0,0,1,epsR,epsRSiO2,0,XQ,ItFig);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -213,9 +213,10 @@ title('Potential');
 xlabel('X [\mum]');
 ylabel('Z [\mum]');
 
-subplot(1,2,2);
-colormap jet;
 
+%%%%%%%%%%%%%%%%%
+% Redefine mesh %
+%%%%%%%%%%%%%%%%%
 xfine = -Pitch:ReSampleFine:Pitch;
 yfine = 0:ReSampleFine:Bulk * 3/2;
 [FineMeshX,FineMeshY] = meshgrid(xfine,yfine);
@@ -233,11 +234,14 @@ CoarseQuery = [CoarseMeshX(:),CoarseMeshY(:)]';
 interp = interpolateSolution(Potential,FineQuery);
 interp = reshape(interp,size(FineMeshX));
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Evaluate the gradient field %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Evaluate gradient field %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [gradx,grady] = evaluateGradient(Potential,CoarseQuery);
 contour(FineMeshX,FineMeshY,interp,ContLevel);
+subplot(1,2,2);
+colormap jet;
 hold on;
 quiver(CoarseMeshX(:),CoarseMeshY(:),gradx,grady,MagnVector);
 hold off;
@@ -246,9 +250,9 @@ xlabel('X [\mum]');
 ylabel('Z [\mum]');
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Evaluate the gradient magnitude %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Evaluate gradient magnitude %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [gradx,grady] = evaluateGradient(Potential,FineQuery);
 gradx = reshape(gradx,length(xfine),length(yfine));
 grady = reshape(grady,length(xfine),length(yfine));
@@ -265,6 +269,9 @@ ylabel('Z [\mum]');
 zlabel('|E| [V/\mum]');
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Evaluate potential along a line %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ItFigIn = ItFigIn + 1;
 figure(ItFigIn);
 yq = 0:ReSampleFine:Bulk;
