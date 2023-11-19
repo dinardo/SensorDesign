@@ -20,7 +20,7 @@ clc;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-BiasV = -80; % Sensor backplane voltage [V]
+BiasV = -90; % Sensor backplane voltage [V]
 
 Fluence = 0; % Irradiation fluence [10^16 1MeV n.eq./cm^2]
              % 1/tau = c*Fluence/(1 + c*Fluence/t), extracted from fit to data [ns^-1]
@@ -34,15 +34,15 @@ TauSe = scale * (1 + ce*Fluence/te)/(ce*Fluence); % Life-time on the strip side 
 TauBh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the backplane side [ns]
 TauSh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the strip side [ns]
 
-Bulk   = 100; % Bulk thickness [um]
-PitchX = 500; % Pitch along X [um] (for 2D&3D geometry)
-PitchY =  50; % Pitch along Y [um] (for 3D geometry)
+Bulk   =    50; % Bulk thickness [um]
+PitchX =   250; % Pitch along X [um] (for 2D&3D geometry)
+PitchY = 20000; % Pitch along Y [um] (for 3D geometry)
 
 qe       = -1.6e-19; % Electron charge [Coulomb]
 eps0     = 8.85e-18; % Vacuum permittivity [F/um]
-epsR     = 12.85;    % Relative permittivity [11.7 Silicon, 5.7 Diamond, 12.85 GaAs]
+epsR     = 11.7;     % Relative permittivity [11.7 Silicon, 5.7 Diamond, 12.85 GaAs]
 dN_dPhi  = 35;       % dN/dPhi extracted from data [#/(um^3 10^16)]
-DeplVnoF = 60;       % Full depletion voltage for non irradiated sensors [V]
+DeplVnoF = 30;       % Full depletion voltage for non irradiated sensors [V]
 DeplV    = qe*Bulk^2/(2*epsR*eps0)*dN_dPhi*Fluence - DeplVnoF; % Sensor full depletion voltage [V]
 rho      = 2*DeplV*epsR*eps0/(qe*Bulk^2); % Bulk doping concentration [#/um^3]
 
@@ -100,8 +100,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Compute the potentials %
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-[TotalPot,  ~,       ~, ItFig] = SolvePoissonPDE2D_PlanarPixel(Bulk,PitchX,BiasV,0,0,epsR,rho*qe/eps0,XQ,ItFig);
-[WeightPot, Sq2D, xq2D, ItFig] = SolvePoissonPDE2D_PlanarPixel(Bulk,PitchX,0,0,1,epsR,0,XQ,ItFig);
+[TotalPot,  ~,       ~, ItFig] = SolvePoissonPDE2D_PlanarPixel(Bulk,PitchX,PitchY,BiasV,0,epsR,rho*qe/eps0,XQ,ItFig);
+[WeightPot, Sq2D, xq2D, ItFig] = SolvePoissonPDE2D_PlanarPixel(Bulk,PitchX,PitchY,0,    1,epsR,          0,XQ,ItFig);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

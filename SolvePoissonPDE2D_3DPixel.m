@@ -1,7 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve Poisson equation to compute the potential %
-% Signal columns = 1 /pixel                       %
-% Bias columns   = 4 /pixel                       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PitchX  = Pitch along X [um]
 % PitchY  = Pitch along Y [um]
@@ -19,6 +17,8 @@ TStart = cputime; % CPU time at start
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
+eps0 = 8.85e-18; % Vacuum permittivity [F/um]
+
 ReSampleFine   = 1;   % Used in order to make nice plots [um]
 ReSampleCoarse = 10;  % Used in order to make nice plots [um]
 ContLevel      = 40;  % Contour plot levels
@@ -170,8 +170,7 @@ applyBoundaryCondition(pdem,'edge',9 + 4*(NPixelsX*NPixelsY-1):pdem.Geometry.Num
 %%%%%%%%%%%%%%%%%
 % Generate mesh %
 %%%%%%%%%%%%%%%%%
-msh = generateMesh(pdem,'Hmax',MeshMax,'Jiggle','mean',...
-    'GeometricOrder','quadratic','MesherVersion','R2013a');
+msh = generateMesh(pdem,'Hmax',MeshMax,'GeometricOrder','quadratic');
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -217,38 +216,49 @@ ylabel('Y [\mum]');
 subplot(1,2,2);
 colormap jet;
 
-x = -PitchX:ReSampleFine:PitchX;
-y = -PitchY:ReSampleFine:PitchY;
-[FineMeshX,FineMeshY] = meshgrid(x,y);
+
+%%%%%%%%%%%%%%%%%
+% Redefine mesh %
+%%%%%%%%%%%%%%%%%
+xfine = -Pitch:ReSampleFine:Pitch;
+yfine = 0:ReSampleFine:Bulk * 3/2;
+[FineMeshX,FineMeshY] = meshgrid(xfine,yfine);
 FineQuery = [FineMeshX(:),FineMeshY(:)]';
 
-x = -PitchX:ReSampleCoarse:PitchX;
-y = -PitchY:ReSampleCoarse:PitchY;
-[CoarseMeshX,CoarseMeshY] = meshgrid(x,y);
+xcoarse = -Pitch:ReSampleCoarse:Pitch;
+ycoarse = 0:ReSampleCoarse:Bulk * 3/2;
+[CoarseMeshX,CoarseMeshY] = meshgrid(xcoarse,ycoarse);
 CoarseQuery = [CoarseMeshX(:),CoarseMeshY(:)]';
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Recompute solution on a different mesh %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Evaluate gradient field %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
 interp = interpolateSolution(Potential,FineQuery);
 interp = reshape(interp,size(FineMeshX));
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
-% Evaluate the gradient %
-%%%%%%%%%%%%%%%%%%%%%%%%%
-[CoarseGradx,CoarseGrady] = evaluateGradient(Potential,CoarseQuery);
 [FineGradx,FineGrady]     = evaluateGradient(Potential,FineQuery);
+[CoarseGradx,CoarseGrady] = evaluateGradient(Potential,CoarseQuery);
+EfieldNorm = reshape(sqrt(FineGradx.^2 + FineGrady.^2),size(FineMeshX));
+EfieldNorm(isinf(EfieldNorm) | isnan(EfieldNorm)) = 0;
 
 
-contour(FineMeshX,FineMeshY,interp,ContLevel);
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Evaluate capacitance %
+%%%%%%%%%%%%%%%%%%%%%%%%
+U = trapz(yfine,trapz(xfine,1/2 * EfieldNorm .* EfieldNorm,2));
+C = eps0*epsR * 2*U / (BiasW * BiasW) / 1e-12; % Capacitance [pF]
+fprintf('Strip capacitance --> %.2f [pF/um] --> %.2f [pF]\n',C,C*PitchY);
+
+
+%%%%%%%%%
+% Plots %
+%%%%%%%%%
+surf(FineMeshX,FineMeshY,EfieldNorm,'FaceAlpha',0.9,'EdgeColor','none','FaceColor','interp');
 hold on;
+contour(FineMeshX,FineMeshY,interp,ContLevel);
 quiver(CoarseMeshX(:),CoarseMeshY(:),CoarseGradx,CoarseGrady,MagnVector);
-absE = reshape(sqrt(FineGradx.^2 + FineGrady.^2),size(FineMeshX));
-surf(FineMeshX,FineMeshY,absE,'FaceAlpha',0.9,'EdgeColor','none','FaceColor','interp');
 hold off;
-title('Potential and its gradient');
+title('Potential, gradient, and gradient magnitude');
 xlabel('X [\mum]');
 ylabel('Y [\mum]');
 zlabel('Electric field abs. value [V/\mum]');
