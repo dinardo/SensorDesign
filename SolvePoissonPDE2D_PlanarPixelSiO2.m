@@ -11,7 +11,7 @@
 % XQ      = Coordinate for potential query along y [um]
 % ItFigIn = Figure iterator input
 
-function [Potential, Sq, yq, ItFigOut] = SolvePoissonPDE2D_PlanarPixel(Bulk,...
+function [Potential, Sq, yq, ItFigOut] = SolvePoissonPDE2D_PlanarPixelSiO2(Bulk,...
     PitchX,PitchY,BiasB,BiasW,epsR,rho,XQ,ItFigIn)
 TStart = cputime; % CPU time at start
 
@@ -19,7 +19,8 @@ TStart = cputime; % CPU time at start
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-eps0 = 8.85e-18; % Vacuum permittivity [F/um]
+eps0    = 8.85e-18; % Vacuum permittivity [F/um]
+epsSiO2 = 3.9;      % Relative permittivity SiO2
 
 ReSampleFine   = 1;   % Used in order to make nice plots [um]
 ReSampleCoarse = 10;  % Used in order to make nice plots [um]
@@ -30,6 +31,7 @@ MeshMax        = 15;  % Maximum mesh edge length [um]
 SHeight    = 2;         % Sensor height [units of bulk thickness]
 MetalThick = 5;         % Metalization thickness [um]
 MetalWidth = PitchX-20; % Metalization width [um]
+SiO2Thick  = Bulk-40;   % SiO2 thickness  [um]
 NStrips    = 13;        % Total number of strips
 
 
@@ -79,9 +81,38 @@ R14 = [ 3 4 -(6*PitchX+PitchX/2) (6*PitchX+PitchX/2) (6*PitchX+PitchX/2) -(6*Pit
 R15 = [ 3 4 -(6*PitchX+PitchX/2) (6*PitchX+PitchX/2) (6*PitchX+PitchX/2) -(6*PitchX+PitchX/2) ...
     Bulk*SHeight Bulk*SHeight 0 0 ]';
 
-gd = [R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15];
-sf = 'R15 - (R1+R2+R3+R4+R5+R6+R7+R8+R9+R10+R11+R12+R13) + R14';
-ns = char('R1','R2','R3','R4','R5','R6','R7','R8','R9','R10','R11','R12','R13','R14','R15');
+BetweenS = PitchX - MetalWidth;
+
+% SiO2 between positive strips
+R16 = [ 3 4 1*PitchX/2-BetweenS/2 1*PitchX/2-BetweenS/2+BetweenS 1*PitchX/2-BetweenS/2+BetweenS 1*PitchX/2-BetweenS/2 ...
+    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+R17 = [ 3 4 3*PitchX/2-BetweenS/2 3*PitchX/2-BetweenS/2+BetweenS 3*PitchX/2-BetweenS/2+BetweenS 3*PitchX/2-BetweenS/2 ...
+    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+R18 = [ 3 4 5*PitchX/2-BetweenS/2 5*PitchX/2-BetweenS/2+BetweenS 5*PitchX/2-BetweenS/2+BetweenS 5*PitchX/2-BetweenS/2 ...
+    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+R19 = [ 3 4 7*PitchX/2-BetweenS/2 7*PitchX/2-BetweenS/2+BetweenS 7*PitchX/2-BetweenS/2+BetweenS 7*PitchX/2-BetweenS/2 ...
+    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+R20 = [ 3 4 9*PitchX/2-BetweenS/2 9*PitchX/2-BetweenS/2+BetweenS 9*PitchX/2-BetweenS/2+BetweenS 9*PitchX/2-BetweenS/2 ...
+    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+R21 = [ 3 4 11*PitchX/2-BetweenS/2 11*PitchX/2-BetweenS/2+BetweenS 11*PitchX/2-BetweenS/2+BetweenS 11*PitchX/2-BetweenS/2 ...
+    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+% SiO2 between negative strips
+R22 = [ 3 4 -(1*PitchX/2-BetweenS/2) -(1*PitchX/2-BetweenS/2+BetweenS) -(1*PitchX/2-BetweenS/2+BetweenS) -(1*PitchX/2-BetweenS/2) ...
+    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+R23 = [ 3 4 -(3*PitchX/2-BetweenS/2) -(3*PitchX/2-BetweenS/2+BetweenS) -(3*PitchX/2-BetweenS/2+BetweenS) -(3*PitchX/2-BetweenS/2) ...
+    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+R24 = [ 3 4 -(5*PitchX/2-BetweenS/2) -(5*PitchX/2-BetweenS/2+BetweenS) -(5*PitchX/2-BetweenS/2+BetweenS) -(5*PitchX/2-BetweenS/2) ...
+    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+R25 = [ 3 4 -(7*PitchX/2-BetweenS/2) -(7*PitchX/2-BetweenS/2+BetweenS) -(7*PitchX/2-BetweenS/2+BetweenS) -(7*PitchX/2-BetweenS/2) ...
+    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+R26 = [ 3 4 -(9*PitchX/2-BetweenS/2) -(9*PitchX/2-BetweenS/2+BetweenS) -(9*PitchX/2-BetweenS/2+BetweenS) -(9*PitchX/2-BetweenS/2) ...
+    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+R27 = [ 3 4 -(11*PitchX/2-BetweenS/2) -(11*PitchX/2-BetweenS/2+BetweenS) -(11*PitchX/2-BetweenS/2+BetweenS) -(11*PitchX/2-BetweenS/2) ...
+    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+
+gd = [R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,R16,R17,R18,R19,R20,R21,R22,R23,R24,R25,R26,R27];
+sf = 'R15 - (R1+R2+R3+R4+R5+R6+R7+R8+R9+R10+R11+R12+R13) + (R14-(R16+R17+R18+R19+R20+R21+R22+R23+R24+R25+R26+R27))';
+ns = char('R1','R2','R3','R4','R5','R6','R7','R8','R9','R10','R11','R12','R13','R14','R15','R16','R17','R18','R19','R20','R21','R22','R23','R24','R25','R26','R27');
 ns = ns';
 
 dl = decsg(gd,sf,ns);
@@ -92,78 +123,78 @@ geometryFromEdges(pdem,dl);
 % Apply boundary conditions (only on conductors) %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Central strip
-applyBoundaryCondition(pdem,'edge',1,'h',1,'r',BiasW);
-applyBoundaryCondition(pdem,'edge',2,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'edge',25,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'edge',49,'h',1,'r',BiasW);
 % Positive strips
+applyBoundaryCondition(pdem,'edge',23,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',29,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',27,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',33,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',31,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',37,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',35,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',41,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',39,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',45,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',43,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',1,'h',1,'r',0);
+% Negative strips
+applyBoundaryCondition(pdem,'edge',47,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',53,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',51,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',57,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',55,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',61,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',59,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',65,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',63,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',108,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',94,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',2,'h',1,'r',0);
+% Top edge
 applyBoundaryCondition(pdem,'edge',3,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',4,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',5,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',6,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',7,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',8,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',9,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',10,'h',1,'r',0);
+% Top all strips
 applyBoundaryCondition(pdem,'edge',11,'h',1,'r',0);
 applyBoundaryCondition(pdem,'edge',12,'h',1,'r',0);
 applyBoundaryCondition(pdem,'edge',13,'h',1,'r',0);
 applyBoundaryCondition(pdem,'edge',14,'h',1,'r',0);
-% Negative strips
 applyBoundaryCondition(pdem,'edge',15,'h',1,'r',0);
 applyBoundaryCondition(pdem,'edge',16,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',17,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',18,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',19,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',20,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',21,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',22,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',23,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',24,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',25,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',26,'h',1,'r',0);
-% Top edge
-applyBoundaryCondition(pdem,'edge',27,'h',1,'r',0);
-% Top all strips
-applyBoundaryCondition(pdem,'edge',28,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',29,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',30,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',31,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',32,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',33,'h',1,'r',0);
 
-applyBoundaryCondition(pdem,'edge',34,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'edge',10,'h',1,'r',BiasW);
 
-applyBoundaryCondition(pdem,'edge',35,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',36,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',37,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',38,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',39,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',40,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',9,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',8,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',7,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',6,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',5,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',4,'h',1,'r',0);
 % Bottom all strips
-applyBoundaryCondition(pdem,'edge',42,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',44,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',46,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',48,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',50,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',52,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',81,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',83,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',85,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',87,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',89,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',91,'h',1,'r',0);
 
-applyBoundaryCondition(pdem,'edge',54,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'edge',79,'h',1,'r',BiasW);
 
-applyBoundaryCondition(pdem,'edge',56,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',58,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',60,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',62,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',64,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',66,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',77,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',75,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',73,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',71,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',69,'h',1,'r',0);
+applyBoundaryCondition(pdem,'edge',67,'h',1,'r',0);
 % Right edge sensor
-applyBoundaryCondition(pdem,'edge',68,'q',0,'g',0);
+applyBoundaryCondition(pdem,'edge',17,'q',0,'g',0);
 % Right edge air
-applyBoundaryCondition(pdem,'edge',69,'q',0,'g',0);
+applyBoundaryCondition(pdem,'edge',18,'q',0,'g',0);
 % Bottom edge
-applyBoundaryCondition(pdem,'edge',70,'h',1,'r',BiasB);
+applyBoundaryCondition(pdem,'edge',19,'h',1,'r',BiasB);
 % Left edge sensor
-applyBoundaryCondition(pdem,'edge',71,'q',0,'g',0);
+applyBoundaryCondition(pdem,'edge',20,'q',0,'g',0);
 % Left edge air
-applyBoundaryCondition(pdem,'edge',72,'q',0,'g',0);
+applyBoundaryCondition(pdem,'edge',21,'q',0,'g',0);
 
 
 %%%%%%%%%%%%%%%%%
@@ -175,8 +206,20 @@ msh = generateMesh(pdem,'Hmax',MeshMax,'GeometricOrder','quadratic');
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve Poisson equation %
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-specifyCoefficients(pdem,'m',0,'d',0,'c',1,   'a',0,'f',0,  'face',1); % Air
-specifyCoefficients(pdem,'m',0,'d',0,'c',epsR,'a',0,'f',rho,'face',2); % Sensor
+specifyCoefficients(pdem,'m',0,'d',0,'c',1,      'a',0,'f',0,  'face',1); % Air
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsR,   'a',0,'f',rho,'face',2); % Sensor
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',3); %SiO2
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',4); %SiO2
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',5); %SiO2
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',6); %SiO2
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',7); %SiO2
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',8); %SiO2
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',9); %SiO2
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',10); %SiO2
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',11); %SiO2
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',12); %SiO2
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',13); %SiO2
+specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',14); %SiO2
 Potential = solvepde(pdem);
 
 
@@ -255,8 +298,8 @@ fprintf('Strip capacitance --> %.2f [pF/um] --> %.2f [pF]\n',C,C*PitchY);
 %%%%%%%%%
 surf(FineMeshX,FineMeshY,EfieldNorm,'FaceAlpha',0.9,'EdgeColor','none','FaceColor','interp');
 hold on;
-%contour(FineMeshX,FineMeshY,interp,ContLevel);
-%quiver(CoarseMeshX(:),CoarseMeshY(:),CoarseGradx,CoarseGrady,MagnVector);
+contour(FineMeshX,FineMeshY,interp,ContLevel);
+quiver(CoarseMeshX(:),CoarseMeshY(:),CoarseGradx,CoarseGrady,MagnVector);
 hold off;
 title('Potential, gradient, and gradient magnitude');
 xlabel('X [\mum]');

@@ -20,7 +20,7 @@ clc;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-BiasV = -90; % Sensor backplane voltage [V]
+BiasV = -100; % Sensor backplane voltage [V]
 
 Fluence = 0; % Irradiation fluence [10^16 1MeV n.eq./cm^2]
              % 1/tau = c*Fluence/(1 + c*Fluence/t), extracted from fit to data [ns^-1]
@@ -42,7 +42,7 @@ qe       = -1.6e-19; % Electron charge [Coulomb]
 eps0     = 8.85e-18; % Vacuum permittivity [F/um]
 epsR     = 11.7;     % Relative permittivity [11.7 Silicon, 5.7 Diamond, 12.85 GaAs]
 dN_dPhi  = 35;       % dN/dPhi extracted from data [#/(um^3 10^16)]
-DeplVnoF = 30;       % Full depletion voltage for non irradiated sensors [V]
+DeplVnoF = 10;       % Full depletion voltage for non irradiated sensors [V]
 DeplV    = qe*Bulk^2/(2*epsR*eps0)*dN_dPhi*Fluence - DeplVnoF; % Sensor full depletion voltage [V]
 rho      = 2*DeplV*epsR*eps0/(qe*Bulk^2); % Bulk doping concentration [#/um^3]
 
