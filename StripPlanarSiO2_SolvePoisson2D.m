@@ -3,36 +3,27 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Bulk    = Bulk thickness [um]
 % PitchX  = Pitch along X [um]
-% PitchY  = Pitch along Y [um]
 % BiasB   = Sensor backplane voltage [V] [0 Weighting; -V All]
 % BiasW   = Sensor central strip voltage [V] [1 Weighting; 0 All]
 % epsR    = Relative permittivity
 % rho     = Charge density in the bulk [(Coulomb/um^3) / eps0 [F/um]]
-% XQ      = Coordinate for potential query along y [um]
-% ItFigIn = Figure iterator input
 
-function [Potential, Sq, yq, ItFigOut] = SolvePoissonPDE2D_PlanarPixelSiO2(Bulk,...
-    PitchX,PitchY,BiasB,BiasW,epsR,rho,XQ,ItFigIn)
+function [pdem,Potential,DecomposedGeom,BulkStart,BulkStop] = StripPlanarSiO2_SolvePoisson2D(...
+    Bulk,PitchX,BiasB,BiasW,epsR,rho)
 TStart = cputime; % CPU time at start
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-eps0    = 8.85e-18; % Vacuum permittivity [F/um]
-epsSiO2 = 3.9;      % Relative permittivity SiO2
-
-ReSampleFine   = 1;   % Used in order to make nice plots [um]
-ReSampleCoarse = 10;  % Used in order to make nice plots [um]
-ContLevel      = 40;  % Contour plot levels
-MagnVector     = 1.5; % Vector field magnification
-MeshMax        = 15;  % Maximum mesh edge length [um]
-
-SHeight    = 2;         % Sensor height [units of bulk thickness]
-MetalThick = 5;         % Metalization thickness [um]
-MetalWidth = PitchX-20; % Metalization width [um]
-SiO2Thick  = Bulk-40;   % SiO2 thickness  [um]
-NStrips    = 13;        % Total number of strips
+MeshMax      = 15;        % Maximum mesh edge length [um]
+VolumeHeight = 2;         % Volume height [units of bulk thickness]
+MetalThick   = 5;         % Metalization thickness [um]
+MetalWidth   = PitchX-20; % Metalization width [um]
+BulkStart    = 0;         % Bulk start coordinate [um]
+BulkStop     = Bulk;      % Bulk stop coordinate [um]
+epsSiO2      = 3.9;       % Relative permittivity SiO2
+SiO2Thick    = Bulk-40;   % SiO2 thickness  [um]
 
 
 %%%%%%%%%%%%%%%%%%%%
@@ -45,78 +36,78 @@ pdem = createpde(1);
 %%%%%%%%%%%%%%%%%%%%%%
 % Create 2D geometry %
 %%%%%%%%%%%%%%%%%%%%%%
-% Central strip
+% Central strips
 R1 = [ 3 4 -MetalWidth/2 MetalWidth/2 MetalWidth/2 -MetalWidth/2 ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
-% Positive strips
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
+% Positive up-strips
 R2 = [ 3 4 1*PitchX-MetalWidth/2 1*PitchX+MetalWidth/2 1*PitchX+MetalWidth/2 1*PitchX-MetalWidth/2 ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
 R3 = [ 3 4 2*PitchX-MetalWidth/2 2*PitchX+MetalWidth/2 2*PitchX+MetalWidth/2 2*PitchX-MetalWidth/2 ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
 R4 = [ 3 4 3*PitchX-MetalWidth/2 3*PitchX+MetalWidth/2 3*PitchX+MetalWidth/2 3*PitchX-MetalWidth/2 ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
 R5 = [ 3 4 4*PitchX-MetalWidth/2 4*PitchX+MetalWidth/2 4*PitchX+MetalWidth/2 4*PitchX-MetalWidth/2 ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
 R6 = [ 3 4 5*PitchX-MetalWidth/2 5*PitchX+MetalWidth/2 5*PitchX+MetalWidth/2 5*PitchX-MetalWidth/2 ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
 R7 = [ 3 4 6*PitchX-MetalWidth/2 6*PitchX+MetalWidth/2 6*PitchX+MetalWidth/2 6*PitchX-MetalWidth/2 ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
-% Negative strips
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
+% Negative up-strips
 R8 = [ 3 4 -(1*PitchX-MetalWidth/2) -(1*PitchX+MetalWidth/2) -(1*PitchX+MetalWidth/2) -(1*PitchX-MetalWidth/2) ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
 R9 = [ 3 4 -(2*PitchX-MetalWidth/2) -(2*PitchX+MetalWidth/2) -(2*PitchX+MetalWidth/2) -(2*PitchX-MetalWidth/2) ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
 R10 = [ 3 4 -(3*PitchX-MetalWidth/2) -(3*PitchX+MetalWidth/2) -(3*PitchX+MetalWidth/2) -(3*PitchX-MetalWidth/2) ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
 R11 = [ 3 4 -(4*PitchX-MetalWidth/2) -(4*PitchX+MetalWidth/2) -(4*PitchX+MetalWidth/2) -(4*PitchX-MetalWidth/2) ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
 R12 = [ 3 4 -(5*PitchX-MetalWidth/2) -(5*PitchX+MetalWidth/2) -(5*PitchX+MetalWidth/2) -(5*PitchX-MetalWidth/2) ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
 R13 = [ 3 4 -(6*PitchX-MetalWidth/2) -(6*PitchX+MetalWidth/2) -(6*PitchX+MetalWidth/2) -(6*PitchX-MetalWidth/2) ...
-    Bulk+MetalThick Bulk+MetalThick Bulk Bulk ]';
+    BulkStop+MetalThick BulkStop+MetalThick BulkStop BulkStop ]';
 % Sensor volume
 R14 = [ 3 4 -(6*PitchX+PitchX/2) (6*PitchX+PitchX/2) (6*PitchX+PitchX/2) -(6*PitchX+PitchX/2) ...
-    Bulk Bulk 0 0 ]';
+    BulkStop BulkStop BulkStart BulkStart ]';
 % Whole volume
 R15 = [ 3 4 -(6*PitchX+PitchX/2) (6*PitchX+PitchX/2) (6*PitchX+PitchX/2) -(6*PitchX+PitchX/2) ...
-    Bulk*SHeight Bulk*SHeight 0 0 ]';
+    Bulk*VolumeHeight Bulk*VolumeHeight 0 0 ]';
 
 BetweenS = PitchX - MetalWidth;
 
 % SiO2 between positive strips
 R16 = [ 3 4 1*PitchX/2-BetweenS/2 1*PitchX/2-BetweenS/2+BetweenS 1*PitchX/2-BetweenS/2+BetweenS 1*PitchX/2-BetweenS/2 ...
-    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+    BulkStop BulkStop BulkStop-SiO2Thick BulkStop-SiO2Thick ]';
 R17 = [ 3 4 3*PitchX/2-BetweenS/2 3*PitchX/2-BetweenS/2+BetweenS 3*PitchX/2-BetweenS/2+BetweenS 3*PitchX/2-BetweenS/2 ...
-    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+    BulkStop BulkStop BulkStop-SiO2Thick BulkStop-SiO2Thick ]';
 R18 = [ 3 4 5*PitchX/2-BetweenS/2 5*PitchX/2-BetweenS/2+BetweenS 5*PitchX/2-BetweenS/2+BetweenS 5*PitchX/2-BetweenS/2 ...
-    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+    BulkStop BulkStop BulkStop-SiO2Thick BulkStop-SiO2Thick ]';
 R19 = [ 3 4 7*PitchX/2-BetweenS/2 7*PitchX/2-BetweenS/2+BetweenS 7*PitchX/2-BetweenS/2+BetweenS 7*PitchX/2-BetweenS/2 ...
-    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+    BulkStop BulkStop BulkStop-SiO2Thick BulkStop-SiO2Thick ]';
 R20 = [ 3 4 9*PitchX/2-BetweenS/2 9*PitchX/2-BetweenS/2+BetweenS 9*PitchX/2-BetweenS/2+BetweenS 9*PitchX/2-BetweenS/2 ...
-    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+    BulkStop BulkStop BulkStop-SiO2Thick BulkStop-SiO2Thick ]';
 R21 = [ 3 4 11*PitchX/2-BetweenS/2 11*PitchX/2-BetweenS/2+BetweenS 11*PitchX/2-BetweenS/2+BetweenS 11*PitchX/2-BetweenS/2 ...
-    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+    BulkStop BulkStop BulkStop-SiO2Thick BulkStop-SiO2Thick ]';
 % SiO2 between negative strips
 R22 = [ 3 4 -(1*PitchX/2-BetweenS/2) -(1*PitchX/2-BetweenS/2+BetweenS) -(1*PitchX/2-BetweenS/2+BetweenS) -(1*PitchX/2-BetweenS/2) ...
-    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+    BulkStop BulkStop BulkStop-SiO2Thick BulkStop-SiO2Thick ]';
 R23 = [ 3 4 -(3*PitchX/2-BetweenS/2) -(3*PitchX/2-BetweenS/2+BetweenS) -(3*PitchX/2-BetweenS/2+BetweenS) -(3*PitchX/2-BetweenS/2) ...
-    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+    BulkStop BulkStop BulkStop-SiO2Thick BulkStop-SiO2Thick ]';
 R24 = [ 3 4 -(5*PitchX/2-BetweenS/2) -(5*PitchX/2-BetweenS/2+BetweenS) -(5*PitchX/2-BetweenS/2+BetweenS) -(5*PitchX/2-BetweenS/2) ...
-    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+    BulkStop BulkStop BulkStop-SiO2Thick BulkStop-SiO2Thick ]';
 R25 = [ 3 4 -(7*PitchX/2-BetweenS/2) -(7*PitchX/2-BetweenS/2+BetweenS) -(7*PitchX/2-BetweenS/2+BetweenS) -(7*PitchX/2-BetweenS/2) ...
-    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+    BulkStop BulkStop BulkStop-SiO2Thick BulkStop-SiO2Thick ]';
 R26 = [ 3 4 -(9*PitchX/2-BetweenS/2) -(9*PitchX/2-BetweenS/2+BetweenS) -(9*PitchX/2-BetweenS/2+BetweenS) -(9*PitchX/2-BetweenS/2) ...
-    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+    BulkStop BulkStop BulkStop-SiO2Thick BulkStop-SiO2Thick ]';
 R27 = [ 3 4 -(11*PitchX/2-BetweenS/2) -(11*PitchX/2-BetweenS/2+BetweenS) -(11*PitchX/2-BetweenS/2+BetweenS) -(11*PitchX/2-BetweenS/2) ...
-    Bulk Bulk Bulk-SiO2Thick Bulk-SiO2Thick ]';
+    BulkStop BulkStop BulkStop-SiO2Thick BulkStop-SiO2Thick ]';
 
 gd = [R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,R16,R17,R18,R19,R20,R21,R22,R23,R24,R25,R26,R27];
 sf = 'R15 - (R1+R2+R3+R4+R5+R6+R7+R8+R9+R10+R11+R12+R13) + (R14-(R16+R17+R18+R19+R20+R21+R22+R23+R24+R25+R26+R27))';
 ns = char('R1','R2','R3','R4','R5','R6','R7','R8','R9','R10','R11','R12','R13','R14','R15','R16','R17','R18','R19','R20','R21','R22','R23','R24','R25','R26','R27');
 ns = ns';
 
-dl = decsg(gd,sf,ns);
-geometryFromEdges(pdem,dl);
+DecomposedGeom = decsg(gd,sf,ns);
+geometryFromEdges(pdem,DecomposedGeom);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -151,8 +142,6 @@ applyBoundaryCondition(pdem,'edge',63,'h',1,'r',0);
 applyBoundaryCondition(pdem,'edge',108,'h',1,'r',0);
 applyBoundaryCondition(pdem,'edge',94,'h',1,'r',0);
 applyBoundaryCondition(pdem,'edge',2,'h',1,'r',0);
-% Top edge
-applyBoundaryCondition(pdem,'edge',3,'h',1,'r',0);
 % Top all strips
 applyBoundaryCondition(pdem,'edge',11,'h',1,'r',0);
 applyBoundaryCondition(pdem,'edge',12,'h',1,'r',0);
@@ -185,6 +174,8 @@ applyBoundaryCondition(pdem,'edge',73,'h',1,'r',0);
 applyBoundaryCondition(pdem,'edge',71,'h',1,'r',0);
 applyBoundaryCondition(pdem,'edge',69,'h',1,'r',0);
 applyBoundaryCondition(pdem,'edge',67,'h',1,'r',0);
+% Top edge
+applyBoundaryCondition(pdem,'edge',3,'h',1,'r',0);
 % Right edge sensor
 applyBoundaryCondition(pdem,'edge',17,'q',0,'g',0);
 % Right edge air
@@ -223,105 +214,5 @@ specifyCoefficients(pdem,'m',0,'d',0,'c',epsSiO2,'a',0,'f',0,  'face',14); %SiO2
 Potential = solvepde(pdem);
 
 
-%%%%%%%%%
-% Plots %
-%%%%%%%%%
-figure(ItFigIn);
-subplot(1,2,1);
-pdegplot(dl,'EdgeLabels','on','SubdomainLabels','on');
-xlim([-PitchX * NStrips/2,+PitchX * NStrips/2]);
-ylim([0,Bulk * SHeight]);
-title('Geometry');
-xlabel('X [\mum]');
-ylabel('Z [\mum]');
-subplot(1,2,2);
-pdegplot(pdem);
-hold on;
-pdemesh(pdem);
-xlim([-PitchX * NStrips/2,+PitchX * NStrips/2]);
-ylim([0,Bulk * SHeight]);
-hold off;
-title('Delaunay mesh');
-xlabel('X [\mum]');
-ylabel('Z [\mum]');
-
-ItFigIn = ItFigIn + 1;
-figure(ItFigIn);
-subplot(1,2,1);
-colormap jet;
-pdeplot(pdem,'xydata',Potential.NodalSolution);
-xlim([-PitchX * NStrips/2,+PitchX * NStrips/2]);
-ylim([0,Bulk * SHeight]);
-title('Potential');
-xlabel('X [\mum]');
-ylabel('Z [\mum]');
-
-subplot(1,2,2);
-colormap jet;
-
-
-%%%%%%%%%%%%%%%%%
-% Redefine mesh %
-%%%%%%%%%%%%%%%%%
-xfine = -PitchX:ReSampleFine:PitchX;
-yfine = 0:ReSampleFine:Bulk * 3/2;
-[FineMeshX,FineMeshY] = meshgrid(xfine,yfine);
-FineQuery = [FineMeshX(:),FineMeshY(:)]';
-
-xcoarse = -PitchX:ReSampleCoarse:PitchX;
-ycoarse = 0:ReSampleCoarse:Bulk * 3/2;
-[CoarseMeshX,CoarseMeshY] = meshgrid(xcoarse,ycoarse);
-CoarseQuery = [CoarseMeshX(:),CoarseMeshY(:)]';
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Evaluate gradient field %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-interp = interpolateSolution(Potential,FineQuery);
-interp = reshape(interp,size(FineMeshX));
-[FineGradx,FineGrady]     = evaluateGradient(Potential,FineQuery);
-[CoarseGradx,CoarseGrady] = evaluateGradient(Potential,CoarseQuery);
-EfieldNorm = reshape(sqrt(FineGradx.^2 + FineGrady.^2),size(FineMeshX));
-EfieldNorm(isinf(EfieldNorm) | isnan(EfieldNorm)) = 0;
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%
-% Evaluate capacitance %
-%%%%%%%%%%%%%%%%%%%%%%%%
-U = trapz(yfine,trapz(xfine,1/2 * EfieldNorm .* EfieldNorm,2));
-C = eps0*epsR * 2*U / (BiasW * BiasW) / 1e-12; % Capacitance [pF]
-fprintf('Strip capacitance --> %.2f [pF/um] --> %.2f [pF]\n',C,C*PitchY);
-
-
-%%%%%%%%%
-% Plots %
-%%%%%%%%%
-surf(FineMeshX,FineMeshY,EfieldNorm,'FaceAlpha',0.9,'EdgeColor','none','FaceColor','interp');
-hold on;
-contour(FineMeshX,FineMeshY,interp,ContLevel);
-quiver(CoarseMeshX(:),CoarseMeshY(:),CoarseGradx,CoarseGrady,MagnVector);
-hold off;
-title('Potential, gradient, and gradient magnitude');
-xlabel('X [\mum]');
-ylabel('Y [\mum]');
-zlabel('Electric field abs. value [V/\mum]');
-grid on;
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Evaluate potential along a line %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ItFigIn = ItFigIn + 1;
-figure(ItFigIn);
-yq = 0:ReSampleFine:Bulk;
-xq = XQ * ones(1,length(yq));
-Sq = interpolateSolution(Potential,xq,yq);
-plot(yq,Sq);
-title(sprintf('Potential along z at x = %.2f um',XQ));
-xlabel('Z [\mum]');
-ylabel('Potential');
-grid on;
-
-ItFigOut = ItFigIn + 1;
 fprintf('CPU time --> %.2f [min]\n\n',(cputime-TStart)/60);
 end

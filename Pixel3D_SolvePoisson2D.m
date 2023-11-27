@@ -1,30 +1,22 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve Poisson equation to compute the potential %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% PitchX  = Pitch along X [um]
-% PitchY  = Pitch along Y [um]
-% BiasB   = Sensor backplane voltage [V] [0 Weighting; -V All]
-% BiasW   = Sensor central pixel voltage [V] [1 Weighting; 0 All]
-% epsR    = Relative permittivity
-% rho     = Charge density in the bulk [(Coulomb/um^3) / eps0 [F/um]]
-% ItFigIn = Figure iterator input
+% PitchX = Pitch along X [um]
+% PitchY = Pitch along Y [um]
+% BiasB  = Sensor backplane voltage [V] [0 Weighting; -V All]
+% BiasW  = Sensor central pixel voltage [V] [1 Weighting; 0 All]
+% epsR   = Relative permittivity
+% rho    = Charge density in the bulk [(Coulomb/um^3) / eps0 [F/um]]
 
-function [Potential, Sq, zq, ItFigOut] = SolvePoissonPDE2D_3DPixel(...
-    PitchX,PitchY,BiasB,BiasW,epsR,rho,ItFigIn)
+function [pdem,Potential,DecomposedGeom] = Pixel3D_SolvePoisson2D(...
+    PitchX,PitchY,BiasB,BiasW,epsR,rho)
 TStart = cputime; % CPU time at start
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-eps0 = 8.85e-18; % Vacuum permittivity [F/um]
-
-ReSampleFine   = 1;   % Used in order to make nice plots [um]
-ReSampleCoarse = 10;  % Used in order to make nice plots [um]
-ContLevel      = 40;  % Contour plot levels
-MagnVector     = 1.5; % Vector field magnification
-MeshMax        = 1;   % Maximum mesh edge length [um]
-
+MeshMax  = 1;   % Maximum mesh edge length [um]
 Radius   = 2.5; % Column radius [um]
 NPixelsX = 5;   % Number of pixels along X
 NPixelsY = 5;   % Number of pixels along Y
@@ -150,8 +142,8 @@ sf = sf(1:end-1);
 sf = strcat(sf,')');
 ns = ns';
 
-dl = decsg(gd,sf,ns);
-geometryFromEdges(pdem,dl);
+DecomposedGeom = decsg(gd,sf,ns);
+geometryFromEdges(pdem,DecomposedGeom);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -180,90 +172,5 @@ specifyCoefficients(pdem,'m',0,'d',0,'c',epsR,'a',0,'f',rho,'face',1);
 Potential = solvepde(pdem);
 
 
-%%%%%%%%%
-% Plots %
-%%%%%%%%%
-figure(ItFigIn);
-subplot(1,2,1);
-pdegplot(dl,'EdgeLabels','on','SubdomainLabels','on');
-xlim([-(PitchX*NPixelsX/2+PitchX/2),PitchX*NPixelsX/2+PitchX/2]);
-ylim([-(PitchY*NPixelsY/2+PitchY/2),PitchY*NPixelsY/2+PitchY/2]);
-title('Geometry');
-xlabel('X [\mum]');
-ylabel('Y [\mum]');
-subplot(1,2,2);
-pdegplot(pdem);
-hold on;
-pdemesh(pdem);
-xlim([-(PitchX*NPixelsX/2+PitchX/2),PitchX*NPixelsX/2+PitchX/2]);
-ylim([-(PitchY*NPixelsY/2+PitchY/2),PitchY*NPixelsY/2+PitchY/2]);
-hold off;
-title('Delaunay mesh');
-xlabel('X [\mum]');
-ylabel('Y [\mum]');
-
-ItFigIn = ItFigIn + 1;
-figure(ItFigIn);
-subplot(1,2,1);
-colormap jet;
-pdeplot(pdem,'xydata',Potential.NodalSolution);
-xlim([-(PitchX*NPixelsX/2+PitchX/2),PitchX*NPixelsX/2+PitchX/2]);
-ylim([-(PitchY*NPixelsY/2+PitchY/2),PitchY*NPixelsY/2+PitchY/2]);
-title('Potential');
-xlabel('X [\mum]');
-ylabel('Y [\mum]');
-
-subplot(1,2,2);
-colormap jet;
-
-
-%%%%%%%%%%%%%%%%%
-% Redefine mesh %
-%%%%%%%%%%%%%%%%%
-xfine = -Pitch:ReSampleFine:Pitch;
-yfine = 0:ReSampleFine:Bulk * 3/2;
-[FineMeshX,FineMeshY] = meshgrid(xfine,yfine);
-FineQuery = [FineMeshX(:),FineMeshY(:)]';
-
-xcoarse = -Pitch:ReSampleCoarse:Pitch;
-ycoarse = 0:ReSampleCoarse:Bulk * 3/2;
-[CoarseMeshX,CoarseMeshY] = meshgrid(xcoarse,ycoarse);
-CoarseQuery = [CoarseMeshX(:),CoarseMeshY(:)]';
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Evaluate gradient field %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-interp = interpolateSolution(Potential,FineQuery);
-interp = reshape(interp,size(FineMeshX));
-[FineGradx,FineGrady]     = evaluateGradient(Potential,FineQuery);
-[CoarseGradx,CoarseGrady] = evaluateGradient(Potential,CoarseQuery);
-EfieldNorm = reshape(sqrt(FineGradx.^2 + FineGrady.^2),size(FineMeshX));
-EfieldNorm(isinf(EfieldNorm) | isnan(EfieldNorm)) = 0;
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%
-% Evaluate capacitance %
-%%%%%%%%%%%%%%%%%%%%%%%%
-U = trapz(yfine,trapz(xfine,1/2 * EfieldNorm .* EfieldNorm,2));
-C = eps0*epsR * 2*U / (BiasW * BiasW) / 1e-12; % Capacitance [pF]
-fprintf('Strip capacitance --> %.2f [pF/um] --> %.2f [pF]\n',C,C*PitchY);
-
-
-%%%%%%%%%
-% Plots %
-%%%%%%%%%
-surf(FineMeshX,FineMeshY,EfieldNorm,'FaceAlpha',0.9,'EdgeColor','none','FaceColor','interp');
-hold on;
-contour(FineMeshX,FineMeshY,interp,ContLevel);
-quiver(CoarseMeshX(:),CoarseMeshY(:),CoarseGradx,CoarseGrady,MagnVector);
-hold off;
-title('Potential, gradient, and gradient magnitude');
-xlabel('X [\mum]');
-ylabel('Y [\mum]');
-zlabel('Electric field abs. value [V/\mum]');
-grid on;
-
-ItFigOut = ItFigIn + 1;
 fprintf('CPU time --> %.2f [min]\n\n',(cputime-TStart)/60);
 end

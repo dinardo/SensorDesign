@@ -100,8 +100,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Compute the potentials %
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-[TotalPot,  ~,       ~, ItFig] = SolvePoissonPDE2D_PlanarPixel(Bulk,PitchX,PitchY,BiasV,0,epsR,rho*qe/eps0,XQ,ItFig);
-[WeightPot, Sq2D, xq2D, ItFig] = SolvePoissonPDE2D_PlanarPixel(Bulk,PitchX,PitchY,0,    1,epsR,          0,XQ,ItFig);
+[pdem, TotalPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanar_SolvePoisson2D(Bulk,PitchX,BiasV,0,epsR,rho*qe/eps0);
+[~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,Bulk,BulkStart,BulkStop,PitchX,PitchY,0,epsR,XQ,ItFig);
+[pdem, WeightPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanar_SolvePoisson2D(Bulk,PitchX,0,1,epsR,0);
+[Sq2D, xq2D, ItFig] = Planar_Plots(pdem,WeightPot,DecomposedGeom,Bulk,BulkStart,BulkStop,PitchX,PitchY,1,epsR,XQ,ItFig);
+
+[pdem, TotalPot, DecomposedGeom] = Pixel3D_SolvePoisson2D(PitchX,PitchY,0,1,epsR,rho*qe/eps0);
+%[~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,Bulk,0,0,PitchX,PitchY,1,epsR,XQ,ItFig);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -109,7 +114,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if do2D3Dcheck == true
     fprintf('@@@ I''m comparing the potential for 2D and 3D @@@\n');
-    [~, Sq3D, xq3D, ItFig] = SolvePoissonPDE3D_PlanarPixel(Bulk,PitchX,PitchY,0,1,epsR,0,XQ,YQ,ItFig);
+    [~, Sq3D, xq3D, ItFig] = PlanarPixel_SolvePoisson3D(Bulk,PitchX,PitchY,0,1,epsR,0,XQ,YQ,ItFig);
     Diff2D3D = ((Sq2D ./ xq2D' + Sq2D ./ (Bulk - xq2D')) ./...
         (Sq3D ./ xq3D' + Sq3D ./ (Bulk - xq3D')) - 1) * 100;
     fprintf('@@@ Potential percentage difference %.1f%% @@@\n\n',mean(Diff2D3D,'omitnan'));

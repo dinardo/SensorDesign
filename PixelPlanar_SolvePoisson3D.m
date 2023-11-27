@@ -12,8 +12,8 @@
 % YQ      = Coordinate for potential query along z [um]
 % ItFigIn = Figure iterator input
 
-function [Potential, Sq, zq, ItFigOut] = SolvePoissonPDE3D_PlanarPixel(Bulk,...
-    PitchX,PitchY,BiasB,BiasW,epsR,rho,XQ,YQ,ItFigIn)
+function [Potential, Sq, zq, ItFigOut] = PixelPlanar_SolvePoisson3D(...
+    Bulk,PitchX,PitchY,BiasB,BiasW,epsR,rho,XQ,YQ,ItFigIn)
 TStart = cputime; % CPU time at start
 
 
@@ -25,10 +25,10 @@ StepMeshHol  = 1; % Step to build mesh hollow volume [um]
 StepMeshVol  = 4; % Step to build mesh whole volume [um]
 StepSlices   = Bulk/10; % Step to build slices along z [um]
 
-SHeight     = 2;         % Sensor height [units of bulk thickness]
-MetalThick  = 5;         % Metalization thickness [um]
-MetalWidthX = PitchX-20; % Metalization width along X [um]
-MetalWidthY = PitchY-20; % Metalization width along Y [um]
+VolumeHeight = 2;         % Volume height [units of bulk thickness]
+MetalThick   = 5;         % Metalization thickness [um]
+MetalWidthX  = PitchX-20; % Metalization width along X [um]
+MetalWidthY  = PitchY-20; % Metalization width along Y [um]
 
 
 %%%%%%%%%%%%%%%%%%%%
@@ -462,7 +462,7 @@ zm2m2(frontier) = [];
 %%%%%%%%%%%%%%%%
 [x,y,z] = meshgrid(-2*PitchX-MetalWidthX:StepMeshVol:2*PitchX+MetalWidthX,...
     -2*PitchY-MetalWidthY:StepMeshVol:2*PitchY+MetalWidthY,...
-    0:StepMeshVol:Bulk*SHeight);
+    0:StepMeshVol:Bulk*VolumeHeight);
 
 x = x(:);
 y = y(:);
@@ -516,10 +516,8 @@ geometryFromMesh(pdem,nodes,elements);
 %%%%%%%%%%%%%%%%%%%%%%%
 % Initialisation for all faces
 applyBoundaryCondition(pdem,'face',1:pdem.Geometry.NumFaces,'h',1,'r',0);
-
 % Backplane
 applyBoundaryCondition(pdem,'face',1,'h',1,'r',BiasB);
-
 % Central pixel
 applyBoundaryCondition(pdem,'face',22,'h',1,'r',BiasW);
 applyBoundaryCondition(pdem,'face',35,'h',1,'r',BiasW);
