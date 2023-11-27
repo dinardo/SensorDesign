@@ -1,21 +1,22 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Plots related to solution fo 2D Poisson equation %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% pdem      = PDE solver
-% Potential = Splution Poisson equation
+% pdem       = PDE solver
+% Potential  = Splution Poisson equation
 % DecomposedGeom = Decomposed geometry
-% Bulk      = Bulk thickness [um]
-% BulkStart = Bulk start coordinate [um]
-% BulkStart = Bulk stop coordinate [um]
-% PitchX    = Pitch along X [um]
-% PitchY    = Pitch along Y [um]
-% BiasW     = Sensor central strip voltage [V] [1 Weighting; 0 All]
-% epsR      = Relative permittivity
-% XQ        = Coordinate for potential query along y [um]
-% ItFigIn   = Figure iterator input
+% Bulk       = Bulk thickness [um]
+% BulkStart  = Bulk start coordinate [um]
+% BulkStart  = Bulk stop coordinate [um]
+% PitchX     = Pitch along X [um]
+% PitchY     = Pitch along Y [um]
+% BiasW      = Sensor central strip voltage [V] [1 Weighting; 0 All]
+% epsR       = Relative permittivity
+% StripNot3D == true ? Strip : 3D
+% XQ         = Coordinate for potential query along y [um]
+% ItFigIn    = Figure iterator input
 
 function [Sq, yq, ItFigOut] = Planar_Plots(pdem,Potential,DecomposedGeom,...
-    Bulk,BulkStart,BulkStop,PitchX,PitchY,BiasW,epsR,XQ,ItFigIn)
+    Bulk,BulkStart,BulkStop,PitchX,PitchY,BiasW,epsR,StripNot3D,XQ,ItFigIn)
 TStart = cputime; % CPU time at start
 
 
@@ -29,30 +30,32 @@ ContLevel      = 40;       % Contour plot levels
 MagnVector     = 1.5;      % Vector field magnification
 VolumeHeight   = 2;        % Volume height [units of bulk thickness]
 NStrips        = 13;       % Total number of strips
+NPixelsX       = 5;        % Number of pixels along X
+NPixelsY       = 5;        % Number of pixels along Y
 
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % Specific parameters %
 %%%%%%%%%%%%%%%%%%%%%%%
-
-% Planar Pixel
-%myXlim  = -(PitchX*NPixelsX/2+PitchX/2),PitchX*NPixelsX/2+PitchX/2];
-%myYlim  = -(PitchY*NPixelsY/2+PitchY/2),PitchY*NPixelsY/2+PitchY/2];
-%L       = Bulk;
-%xfine   = -PitchX:ReSampleFine:PitchX;
-%yfine   = -PitchY:ReSampleFine:PitchY;
-%xcoarse = -PitchX:ReSampleCoarse:PitchX;
-%ycoarse = -PitchY:ReSampleCoarse:PitchY;
-
-% Planar Strip
-myXlim  = [-PitchX * NStrips/2,+PitchX * NStrips/2];
-myYlim  = [0,Bulk * VolumeHeight];
-L       = PitchY;
-xfine   = -PitchX:ReSampleFine:PitchX;
-yfine   = BulkStart:ReSampleFine:BulkStop * 3/2;
-xcoarse = -PitchX:ReSampleCoarse:PitchX;
-ycoarse = BulkStart:ReSampleCoarse:BulkStop * 3/2;
-
+if StripNot3D == true
+    % Planar Strip
+    myXlim  = [-PitchX * NStrips/2,+PitchX * NStrips/2];
+    myYlim  = [0,Bulk * VolumeHeight];
+    L       = PitchY;
+    xfine   = -PitchX:ReSampleFine:PitchX;
+    yfine   = BulkStart:ReSampleFine:BulkStop * 3/2;
+    xcoarse = -PitchX:ReSampleCoarse:PitchX;
+    ycoarse = BulkStart:ReSampleCoarse:BulkStop * 3/2;
+else
+    % 3D Pixel
+    myXlim   = [-(PitchX*NPixelsX/2+PitchX/2),PitchX*NPixelsX/2+PitchX/2];
+    myYlim   = [-(PitchY*NPixelsY/2+PitchY/2),PitchY*NPixelsY/2+PitchY/2];
+    L        = Bulk;
+    xfine    = -PitchX/2:ReSampleFine:PitchX/2;
+    yfine    = -PitchY/2:ReSampleFine:PitchY/2;
+    xcoarse  = -PitchX/2:ReSampleCoarse:PitchX/2;
+    ycoarse  = -PitchY/2:ReSampleCoarse:PitchY/2;
+end    
 
 %%%%%%%%%
 % Plots %
@@ -117,7 +120,7 @@ EfieldNorm(isinf(EfieldNorm) | isnan(EfieldNorm)) = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%
 U = trapz(yfine,trapz(xfine,1/2 * EfieldNorm .* EfieldNorm,2));
 C = eps0*epsR * 2*U / (BiasW * BiasW) / 1e-12; % Capacitance [pF/um]
-fprintf('Strip capacitance --> %.4f [pF/um] --> %.2f [pF]\n',C,C*L);
+fprintf('Channel capacitance --> %.4f [pF/um] --> %.2f [pF]\n',C,C*L);
 
 
 %%%%%%%%%
@@ -138,16 +141,22 @@ grid on;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Evaluate potential along a line %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ItFigIn = ItFigIn + 1;
-figure(ItFigIn);
-yq = BulkStart:ReSampleFine:BulkStop;
-xq = XQ * ones(1,length(yq));
-Sq = interpolateSolution(Potential,xq,yq);
-plot(yq,Sq);
-title(sprintf('Potential along z at x = %.2f um',XQ));
-xlabel('Z [\mum]');
-ylabel('Potential');
-grid on;
+if StripNot3D == true
+    ItFigIn = ItFigIn + 1;
+    figure(ItFigIn);
+    yq = BulkStart:ReSampleFine:BulkStop;
+    xq = XQ * ones(1,length(yq));
+    Sq = interpolateSolution(Potential,xq,yq);
+    plot(yq,Sq);
+    title(sprintf('Potential along z at x = %.2f um',XQ));
+    xlabel('Z [\mum]');
+    ylabel('Potential');
+    grid on;
+else
+    Sq = 0;
+    yq = 0;
+end
+
 
 ItFigOut = ItFigIn + 1;
 fprintf('CPU time --> %.2f [min]\n\n',(cputime-TStart)/60);

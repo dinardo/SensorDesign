@@ -29,7 +29,7 @@ a2 = [-1.845568670,-4.284640743];
 if (sigma <= 0)    
     y = 0;
     return;
-end;
+end
 v = (x - mpv) / sigma;
 
 if (v < -5.5)
@@ -37,7 +37,7 @@ if (v < -5.5)
     if (u < 1e-10)
         y = 0.0;
         return;
-    end;
+    end
     
     ue  = exp(-1/u);
     us  = sqrt(u);
@@ -62,12 +62,12 @@ elseif(v < 300)
 else
     u   = 1/(v-v*log(v)/(v+1));
     den = u*u*(1+(a2(1)+a2(2)*u)*u);
-end;
+end
 
 if (not(norm))
     y = den;
     return;
-end;
+end
 
 y = den/sigma;
 

@@ -16,7 +16,7 @@ TStart = cputime; % CPU time at start
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-MeshMax      = 15;          % Maximum mesh edge length [um]
+MeshMax      = 5;           % Maximum mesh edge length [um]
 VolumeHeight = 2;           % Volume height [units of bulk thickness]
 MetalThick   = 5;           % Metalization thickness [um]
 MetalWidth   = PitchX-20;   % Metalization width [um]

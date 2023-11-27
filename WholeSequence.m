@@ -35,16 +35,17 @@ TauBh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the backplane s
 TauSh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the strip side [ns]
 
 Bulk   =    50; % Bulk thickness [um]
-PitchX =   250; % Pitch along X [um] (for 2D&3D geometry)
-PitchY = 20000; % Pitch along Y [um] (for 3D geometry)
+PitchX =   250; % Pitch along X [um]
+PitchY = 20000; % Pitch along Y [um]
 
 qe       = -1.6e-19; % Electron charge [Coulomb]
 eps0     = 8.85e-18; % Vacuum permittivity [F/um]
 epsR     = 11.7;     % Relative permittivity [11.7 Silicon, 5.7 Diamond, 12.85 GaAs]
 dN_dPhi  = 35;       % dN/dPhi extracted from data [#/(um^3 10^16)]
-DeplVnoF = 10;       % Full depletion voltage for non irradiated sensors [V]
+DeplVnoF = 5;        % Full depletion voltage for non irradiated sensors [V]
 DeplV    = qe*Bulk^2/(2*epsR*eps0)*dN_dPhi*Fluence - DeplVnoF; % Sensor full depletion voltage [V]
 rho      = 2*DeplV*epsR*eps0/(qe*Bulk^2); % Bulk doping concentration [#/um^3]
+%rho      = 2*DeplV*epsR*eps0/(qe*sqrt(PitchX^2+PitchY^2)/2); % Bulk doping concentration [#/um^3]
 
 BField = 0.0; % Magnetic field (orthogonal+outgoing from 2D geometry) [T]
 
@@ -100,13 +101,16 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Compute the potentials %
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-[pdem, TotalPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanar_SolvePoisson2D(Bulk,PitchX,BiasV,0,epsR,rho*qe/eps0);
-[~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,Bulk,BulkStart,BulkStop,PitchX,PitchY,0,epsR,XQ,ItFig);
-[pdem, WeightPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanar_SolvePoisson2D(Bulk,PitchX,0,1,epsR,0);
-[Sq2D, xq2D, ItFig] = Planar_Plots(pdem,WeightPot,DecomposedGeom,Bulk,BulkStart,BulkStop,PitchX,PitchY,1,epsR,XQ,ItFig);
-
-[pdem, TotalPot, DecomposedGeom] = Pixel3D_SolvePoisson2D(PitchX,PitchY,0,1,epsR,rho*qe/eps0);
-%[~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,Bulk,0,0,PitchX,PitchY,1,epsR,XQ,ItFig);
+% Planar Strip
+[pdem, TotalPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanarDouble_SolvePoisson2D(Bulk,PitchX,BiasV,0,epsR,rho*qe/eps0);
+[~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,Bulk,BulkStart,BulkStop,PitchX,PitchY,0,epsR,true,XQ,ItFig);
+[pdem, WeightPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanarDouble_SolvePoisson2D(Bulk,PitchX,0,1,epsR,0);
+[Sq2D, xq2D, ItFig] = Planar_Plots(pdem,WeightPot,DecomposedGeom,Bulk,BulkStart,BulkStop,PitchX,PitchY,1,epsR,true,XQ,ItFig);
+% 3D Pixel
+% [pdem, TotalPot, DecomposedGeom] = Pixel3D_SolvePoisson2D(PitchX,PitchY,BiasV,0,epsR,rho*qe/eps0);
+% [~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,Bulk,0,0,PitchX,PitchY,0,epsR,false,XQ,ItFig);
+% [pdem, WeightPot, DecomposedGeom] = Pixel3D_SolvePoisson2D(PitchX,PitchY,0,1,epsR,0);
+% [~, ~, ItFig] = Planar_Plots(pdem,WeightPot,DecomposedGeom,Bulk,0,0,PitchX,PitchY,1,epsR,false,XQ,ItFig);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
