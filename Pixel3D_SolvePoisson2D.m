@@ -160,13 +160,13 @@ geometryFromEdges(pdem,DecomposedGeom);
 % Apply boundary conditions (only on conductors) %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Boundary of the domain
-applyBoundaryCondition(pdem,'edge',1:4,'q',0,'g',0);
+applyBoundaryCondition(pdem,'neumann','edge',1:4,'q',0,'g',0);
 % Central pixel signal columns
-applyBoundaryCondition(pdem,'edge',5:8,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'dirichlet','edge',5:8,'h',1,'r',BiasW);
 % Other pixels signal columns
-applyBoundaryCondition(pdem,'edge',9:12 + 4*(NPixelsX*NPixelsY-2),'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',9:12 + 4*(NPixelsX*NPixelsY-2),'h',1,'r',0);
 % All pixels bias columns
-applyBoundaryCondition(pdem,'edge',13 + 4*(NPixelsX*NPixelsY-2):pdem.Geometry.NumEdges,'h',1,'r',BiasB);
+applyBoundaryCondition(pdem,'dirichlet','edge',13 + 4*(NPixelsX*NPixelsY-2):pdem.Geometry.NumEdges,'h',1,'r',BiasB);
 
 
 %%%%%%%%%%%%%%%%%

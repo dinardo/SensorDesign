@@ -20,15 +20,14 @@ TStart = cputime; % CPU time at start
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-ReSampleFine = 1; % Used in order to make nice plots [um]
-StepMeshHol  = 1; % Step to build mesh hollow volume [um]
-StepMeshVol  = 4; % Step to build mesh whole volume [um]
-StepSlices   = Bulk/10; % Step to build slices along z [um]
-
 VolumeHeight = 2;         % Volume height [units of bulk thickness]
 MetalThick   = 5;         % Metalization thickness [um]
 MetalWidthX  = PitchX-20; % Metalization width along X [um]
 MetalWidthY  = PitchY-20; % Metalization width along Y [um]
+ReSampleFine = 1;         % Used in order to make nice plots [um]
+StepMeshHol  = 1;         % Step to build mesh hollow volume [um]
+StepMeshVol  = 4;         % Step to build mesh whole volume [um]
+StepSlices   = Bulk/10;   % Step to build slices along z [um]
 
 
 %%%%%%%%%%%%%%%%%%%%
@@ -515,14 +514,14 @@ geometryFromMesh(pdem,nodes,elements);
 % Boundary conditions %
 %%%%%%%%%%%%%%%%%%%%%%%
 % Initialisation for all faces
-applyBoundaryCondition(pdem,'face',1:pdem.Geometry.NumFaces,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','face',1:pdem.Geometry.NumFaces,'h',1,'r',0);
 % Backplane
-applyBoundaryCondition(pdem,'face',1,'h',1,'r',BiasB);
+applyBoundaryCondition(pdem,'dirichlet','face',1,'h',1,'r',BiasB);
 % Central pixel
-applyBoundaryCondition(pdem,'face',22,'h',1,'r',BiasW);
-applyBoundaryCondition(pdem,'face',35,'h',1,'r',BiasW);
-applyBoundaryCondition(pdem,'face',44,'h',1,'r',BiasW);
-applyBoundaryCondition(pdem,'face',80,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'dirichlet','face',22,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'dirichlet','face',35,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'dirichlet','face',44,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'dirichlet','face',80,'h',1,'r',BiasW);
 
 
 %%%%%%%%%%%%%%%

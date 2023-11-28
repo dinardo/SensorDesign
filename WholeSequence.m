@@ -102,9 +102,9 @@ end
 % Compute the potentials %
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Planar Strip
-[pdem, TotalPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanarDouble_SolvePoisson2D(Bulk,PitchX,BiasV,0,epsR,rho*qe/eps0);
+[pdem, TotalPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanarSiO2_SolvePoisson2D(Bulk,PitchX,BiasV,0,epsR,rho*qe/eps0);
 [~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,Bulk,BulkStart,BulkStop,PitchX,PitchY,0,epsR,true,XQ,ItFig);
-[pdem, WeightPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanarDouble_SolvePoisson2D(Bulk,PitchX,0,1,epsR,0);
+[pdem, WeightPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanarSiO2_SolvePoisson2D(Bulk,PitchX,0,1,epsR,0);
 [Sq2D, xq2D, ItFig] = Planar_Plots(pdem,WeightPot,DecomposedGeom,Bulk,BulkStart,BulkStop,PitchX,PitchY,1,epsR,true,XQ,ItFig);
 % 3D Pixel
 % [pdem, TotalPot, DecomposedGeom] = Pixel3D_SolvePoisson2D(PitchX,PitchY,BiasV,0,epsR,rho*qe/eps0);

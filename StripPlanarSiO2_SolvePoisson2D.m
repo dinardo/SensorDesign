@@ -17,7 +17,7 @@ TStart = cputime; % CPU time at start
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 MeshMax      = 5;         % Maximum mesh edge length [um]
-VolumeHeight = 2;         % Volume height [units of bulk thickness]
+VolumeHeight = 3;         % Volume height [units of bulk thickness]
 MetalThick   = 5;         % Metalization thickness [um]
 MetalWidth   = PitchX-20; % Metalization width [um]
 BulkStart    = 0;         % Bulk start coordinate [um]
@@ -114,78 +114,78 @@ geometryFromEdges(pdem,DecomposedGeom);
 % Apply boundary conditions (only on conductors) %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Central strip
-applyBoundaryCondition(pdem,'edge',25,'h',1,'r',BiasW);
-applyBoundaryCondition(pdem,'edge',49,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'dirichlet','edge',25,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'dirichlet','edge',49,'h',1,'r',BiasW);
 % Positive strips
-applyBoundaryCondition(pdem,'edge',23,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',29,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',27,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',33,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',31,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',37,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',35,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',41,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',39,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',45,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',43,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',1,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',23,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',29,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',27,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',33,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',31,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',37,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',35,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',41,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',39,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',45,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',43,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',1,'h',1,'r',0);
 % Negative strips
-applyBoundaryCondition(pdem,'edge',47,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',53,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',51,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',57,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',55,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',61,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',59,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',65,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',63,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',108,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',94,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',2,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',47,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',53,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',51,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',57,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',55,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',61,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',59,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',65,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',63,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',108,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',94,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',2,'h',1,'r',0);
 % Top all strips
-applyBoundaryCondition(pdem,'edge',11,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',12,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',13,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',14,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',15,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',16,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',11,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',12,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',13,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',14,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',15,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',16,'h',1,'r',0);
 
-applyBoundaryCondition(pdem,'edge',10,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'dirichlet','edge',10,'h',1,'r',BiasW);
 
-applyBoundaryCondition(pdem,'edge',9,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',8,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',7,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',6,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',5,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',4,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',9,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',8,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',7,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',6,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',5,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',4,'h',1,'r',0);
 % Bottom all strips
-applyBoundaryCondition(pdem,'edge',81,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',83,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',85,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',87,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',89,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',91,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',81,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',83,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',85,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',87,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',89,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',91,'h',1,'r',0);
 
-applyBoundaryCondition(pdem,'edge',79,'h',1,'r',BiasW);
+applyBoundaryCondition(pdem,'dirichlet','edge',79,'h',1,'r',BiasW);
 
-applyBoundaryCondition(pdem,'edge',77,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',75,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',73,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',71,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',69,'h',1,'r',0);
-applyBoundaryCondition(pdem,'edge',67,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',77,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',75,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',73,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',71,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',69,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',67,'h',1,'r',0);
 % Top edge
-applyBoundaryCondition(pdem,'edge',3,'h',1,'r',0);
+applyBoundaryCondition(pdem,'dirichlet','edge',3,'h',1,'r',0);
 % Right edge sensor
-applyBoundaryCondition(pdem,'edge',17,'q',0,'g',0);
+applyBoundaryCondition(pdem,'neumann','edge',17,'q',0,'g',0);
 % Right edge air
-applyBoundaryCondition(pdem,'edge',18,'q',0,'g',0);
+applyBoundaryCondition(pdem,'neumann','edge',18,'q',0,'g',0);
 % Bottom edge
-applyBoundaryCondition(pdem,'edge',19,'h',1,'r',BiasB);
+applyBoundaryCondition(pdem,'dirichlet','edge',19,'h',1,'r',BiasB);
 % Left edge sensor
-applyBoundaryCondition(pdem,'edge',20,'q',0,'g',0);
+applyBoundaryCondition(pdem,'neumann','edge',20,'q',0,'g',0);
 % Left edge air
-applyBoundaryCondition(pdem,'edge',21,'q',0,'g',0);
+applyBoundaryCondition(pdem,'neumann','edge',21,'q',0,'g',0);
 
 
 %%%%%%%%%%%%%%%%%
