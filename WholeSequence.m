@@ -44,8 +44,8 @@ epsR     = 11.7;     % Relative permittivity [11.7 Silicon, 5.7 Diamond, 12.85 G
 dN_dPhi  = 35;       % dN/dPhi extracted from data [#/(um^3 10^16)]
 DeplVnoF = 5;        % Full depletion voltage for non irradiated sensors [V]
 DeplV    = qe*Bulk^2/(2*epsR*eps0)*dN_dPhi*Fluence - DeplVnoF; % Sensor full depletion voltage [V]
-rho      = 2*DeplV*epsR*eps0/(qe*Bulk^2); % Bulk doping concentration [#/um^3]
-%rho      = 2*DeplV*epsR*eps0/(qe*sqrt(PitchX^2+PitchY^2)/2); % Bulk doping concentration [#/um^3]
+rho      = 2*DeplV*epsR*eps0/(qe*Bulk^2); % Bulk doping concentration Planar Strip [#/um^3]
+%rho      = 2*DeplV*epsR*eps0/(qe*sqrt(PitchX^2+PitchY^2)/2); % Bulk doping concentration 3D Pixel [#/um^3]
 
 BField = 0.0; % Magnetic field (orthogonal+outgoing from 2D geometry) [T]
 

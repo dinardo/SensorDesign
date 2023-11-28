@@ -2,7 +2,7 @@
 % Plots related to solution fo 2D Poisson equation %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % pdem       = PDE solver
-% Potential  = Splution Poisson equation
+% Potential  = Solution of Poisson equation
 % DecomposedGeom = Decomposed geometry
 % Bulk       = Bulk thickness [um]
 % BulkStart  = Bulk start coordinate [um]
@@ -27,8 +27,8 @@ eps0           = 8.85e-18; % Vacuum permittivity [F/um]
 ReSampleFine   = 1;        % Used in order to make nice plots [um]
 ReSampleCoarse = 10;       % Used in order to make nice plots [um]
 ContLevel      = 40;       % Contour plot levels
-MagnVector     = 1.5;      % Vector field magnification
-VolumeHeight   = 2;        % Volume height [units of bulk thickness]
+MagnVector     = 0.5;      % Vector field magnification
+VolumeHeight   = 3;        % Volume height [units of bulk thickness]
 NStrips        = 13;       % Total number of strips
 NPixelsX       = 5;        % Number of pixels along X
 NPixelsY       = 5;        % Number of pixels along Y
@@ -43,9 +43,9 @@ if StripNot3D == true
     myYlim  = [0,Bulk * VolumeHeight];
     L       = PitchY;
     xfine   = -PitchX:ReSampleFine:PitchX;
-    yfine   = BulkStart:ReSampleFine:BulkStop * 3/2;
+    yfine   = 0:ReSampleFine:Bulk * VolumeHeight;
     xcoarse = -PitchX:ReSampleCoarse:PitchX;
-    ycoarse = BulkStart:ReSampleCoarse:BulkStop * 3/2;
+    ycoarse = 0:ReSampleCoarse:Bulk * VolumeHeight;
 else
     % 3D Pixel
     myXlim   = [-(PitchX*NPixelsX/2+PitchX/2),PitchX*NPixelsX/2+PitchX/2];
@@ -128,8 +128,8 @@ fprintf('Channel capacitance --> %.4f [pF/um] --> %.2f [pF]\n',C,C*L);
 %%%%%%%%%
 surf(FineMeshX,FineMeshY,EfieldNorm,'FaceAlpha',0.9,'EdgeColor','none','FaceColor','interp');
 hold on;
-contour(FineMeshX,FineMeshY,interp,ContLevel);
-quiver(CoarseMeshX(:),CoarseMeshY(:),CoarseGradx,CoarseGrady,MagnVector);
+%contour(FineMeshX,FineMeshY,interp,ContLevel);
+%quiver(CoarseMeshX(:),CoarseMeshY(:),CoarseGradx,CoarseGrady,MagnVector);
 hold off;
 title('Potential, gradient, and gradient magnitude');
 xlabel('X [\mum]');
