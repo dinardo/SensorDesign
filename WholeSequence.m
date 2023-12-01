@@ -34,8 +34,8 @@ TauSe = scale * (1 + ce*Fluence/te)/(ce*Fluence); % Life-time on the strip side 
 TauBh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the backplane side [ns]
 TauSh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the strip side [ns]
 
-Bulk   =    50; % Bulk thickness [um]
-PitchX =   250; % Pitch along X [um]
+Bulk   =   250; % Bulk thickness [um]
+PitchX =    50; % Pitch along X [um]
 PitchY = 20000; % Pitch along Y [um]
 
 qe       = -1.6e-19; % Electron charge [Coulomb]
@@ -101,14 +101,18 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Compute the potentials %
 %%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Planar Strip
-[pdem, TotalPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanarSiO2_SolvePoisson2D(Bulk,PitchX,BiasV,0,epsR,rho*qe/eps0);
+[pdem, TotalPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanarMulti_SolvePoisson2D(Bulk,PitchX,BiasV,0,epsR,rho*qe/eps0);
 [~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,Bulk,BulkStart,BulkStop,PitchX,PitchY,0,epsR,true,XQ,ItFig);
-[pdem, WeightPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanarSiO2_SolvePoisson2D(Bulk,PitchX,0,1,epsR,0);
+
+[pdem, WeightPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanarMulti_SolvePoisson2D(Bulk,PitchX,0,1,epsR,0);
 [Sq2D, xq2D, ItFig] = Planar_Plots(pdem,WeightPot,DecomposedGeom,Bulk,BulkStart,BulkStop,PitchX,PitchY,1,epsR,true,XQ,ItFig);
+
 % 3D Pixel
 % [pdem, TotalPot, DecomposedGeom] = Pixel3D_SolvePoisson2D(PitchX,PitchY,BiasV,0,epsR,rho*qe/eps0);
 % [~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,Bulk,0,0,PitchX,PitchY,0,epsR,false,XQ,ItFig);
+
 % [pdem, WeightPot, DecomposedGeom] = Pixel3D_SolvePoisson2D(PitchX,PitchY,0,1,epsR,0);
 % [~, ~, ItFig] = Planar_Plots(pdem,WeightPot,DecomposedGeom,Bulk,0,0,PitchX,PitchY,1,epsR,false,XQ,ItFig);
 

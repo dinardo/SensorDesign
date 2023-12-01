@@ -148,8 +148,7 @@ for i = 1:NPixelsX+1
         ns = [ns; sprintf('Cb%d%d',i,j)];
     end
 end
-sf = sf(1:end-1);
-sf = strcat(sf,')');
+sf = strcat(sf(1:end-1),')');
 ns = ns';
 
 DecomposedGeom = decsg(gd,sf,ns);

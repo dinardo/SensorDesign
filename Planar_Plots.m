@@ -128,8 +128,8 @@ fprintf('Channel capacitance --> %.4f [pF/um] --> %.2f [pF]\n',C,C*L);
 %%%%%%%%%
 surf(FineMeshX,FineMeshY,EfieldNorm,'FaceAlpha',0.9,'EdgeColor','none','FaceColor','interp');
 hold on;
-%contour(FineMeshX,FineMeshY,interp,ContLevel);
-%quiver(CoarseMeshX(:),CoarseMeshY(:),CoarseGradx,CoarseGrady,MagnVector);
+contour(FineMeshX,FineMeshY,interp,ContLevel);
+quiver(CoarseMeshX(:),CoarseMeshY(:),CoarseGradx,CoarseGrady,MagnVector);
 hold off;
 title('Potential, gradient, and gradient magnitude');
 xlabel('X [\mum]');
