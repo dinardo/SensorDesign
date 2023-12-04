@@ -20,7 +20,7 @@ clc;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-BiasV = -100; % Sensor backplane voltage [V]
+BiasV = -120; % Sensor backplane voltage [V]
 
 Fluence = 0; % Irradiation fluence [10^16 1MeV n.eq./cm^2]
              % 1/tau = c*Fluence/(1 + c*Fluence/t), extracted from fit to data [ns^-1]
@@ -34,15 +34,15 @@ TauSe = scale * (1 + ce*Fluence/te)/(ce*Fluence); % Life-time on the strip side 
 TauBh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the backplane side [ns]
 TauSh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the strip side [ns]
 
-Bulk   =   250; % Bulk thickness [um]
-PitchX =    50; % Pitch along X [um]
+Bulk   =   200; % Bulk thickness [um]
+PitchX =   250; % Pitch along X [um]
 PitchY = 20000; % Pitch along Y [um]
 
 qe       = -1.6e-19; % Electron charge [Coulomb]
 eps0     = 8.85e-18; % Vacuum permittivity [F/um]
 epsR     = 11.7;     % Relative permittivity [11.7 Silicon, 5.7 Diamond, 12.85 GaAs]
 dN_dPhi  = 35;       % dN/dPhi extracted from data [#/(um^3 10^16)]
-DeplVnoF = 5;        % Full depletion voltage for non irradiated sensors [V]
+DeplVnoF = 10;       % Full depletion voltage for non irradiated sensors [V]
 DeplV    = qe*Bulk^2/(2*epsR*eps0)*dN_dPhi*Fluence - DeplVnoF; % Sensor full depletion voltage [V]
 rho      = 2*DeplV*epsR*eps0/(qe*Bulk^2); % Bulk doping concentration Planar Strip [#/um^3]
 %rho      = 2*DeplV*epsR*eps0/(qe*sqrt(PitchX^2+PitchY^2)/2); % Bulk doping concentration 3D Pixel [#/um^3]
@@ -103,18 +103,18 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Planar Strip
-[pdem, TotalPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanarMulti_SolvePoisson2D(Bulk,PitchX,BiasV,0,epsR,rho*qe/eps0);
-[~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,Bulk,BulkStart,BulkStop,PitchX,PitchY,0,epsR,true,XQ,ItFig);
+[pdem, TotalPot, DecomposedGeom, BulkStart, BulkStop, VolumeHeight] = StripPlanar_SolvePoisson2D(Bulk,PitchX,BiasV,epsR,rho*qe);
+[~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,BulkStart,BulkStop,VolumeHeight,PitchX,PitchY,0,epsR,true,XQ,ItFig);
 
-[pdem, WeightPot, DecomposedGeom, BulkStart, BulkStop] = StripPlanarMulti_SolvePoisson2D(Bulk,PitchX,0,1,epsR,0);
-[Sq2D, xq2D, ItFig] = Planar_Plots(pdem,WeightPot,DecomposedGeom,Bulk,BulkStart,BulkStop,PitchX,PitchY,1,epsR,true,XQ,ItFig);
+[pdem, WeightPot, DecomposedGeom, BulkStart, BulkStop, VolumeHeight] = StripPlanar_SolvePoisson2D(Bulk,PitchX,0,epsR,0);
+[Sq2D, xq2D, ItFig] = Planar_Plots(pdem,WeightPot,DecomposedGeom,BulkStart,BulkStop,VolumeHeight,PitchX,PitchY,1,epsR,true,XQ,ItFig);
 
 % 3D Pixel
-% [pdem, TotalPot, DecomposedGeom] = Pixel3D_SolvePoisson2D(PitchX,PitchY,BiasV,0,epsR,rho*qe/eps0);
-% [~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,Bulk,0,0,PitchX,PitchY,0,epsR,false,XQ,ItFig);
-
-% [pdem, WeightPot, DecomposedGeom] = Pixel3D_SolvePoisson2D(PitchX,PitchY,0,1,epsR,0);
-% [~, ~, ItFig] = Planar_Plots(pdem,WeightPot,DecomposedGeom,Bulk,0,0,PitchX,PitchY,1,epsR,false,XQ,ItFig);
+% [pdem, TotalPot, DecomposedGeom] = Pixel3D_SolvePoisson2D(PitchX,PitchY,BiasV,epsR,rho*qe);
+% [~, ~, ItFig] = Planar_Plots(pdem,TotalPot,DecomposedGeom,0,Bulk,0,PitchX,PitchY,0,epsR,false,XQ,ItFig);
+% 
+% [pdem, WeightPot, DecomposedGeom] = Pixel3D_SolvePoisson2D(PitchX,PitchY,0,epsR,0);
+% [~, ~, ItFig] = Planar_Plots(pdem,WeightPot,DecomposedGeom,0,Bulk,0,PitchX,PitchY,1,epsR,false,XQ,ItFig);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -3,30 +3,34 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PitchX = Pitch along X [um]
 % PitchY = Pitch along Y [um]
-% BiasB  = Sensor backplane voltage [V] [0 Weighting; -V All]
-% BiasW  = Sensor central pixel voltage [V] [1 Weighting; 0 All]
+% BiasV  = Sensor backplane voltage [V] == 0 ? compute weighting field
 % epsR   = Relative permittivity
-% rho    = Charge density in the bulk [(Coulomb/um^3) / eps0 [F/um]]
+% rho    = Charge density in the bulk [(Coulomb/um^3)]
 
-function [pdem,Potential,DecomposedGeom] = Pixel3D_SolvePoisson2D(...
-    PitchX,PitchY,BiasB,BiasW,epsR,rho)
+function [pdem,Potential,DecomposedGeom] =...
+    Pixel3D_SolvePoisson2D(PitchX,PitchY,BiasV,epsR,rho)
 TStart = cputime; % CPU time at start
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-MeshMax  = 5;   % Maximum mesh edge length [um]
-Radius   = 2.5; % Column radius [um]
-NPixelsX = 5;   % Number of pixels along X
-NPixelsY = 5;   % Number of pixels along Y
+eps0     = 8.85e-18; % Vacuum permittivity [F/um]
+MeshMax  = 5;        % Maximum mesh edge length [um]
+Radius   = 2.5;      % Column radius [um]
+NPixelsX = 5;        % Number of pixels along X
+NPixelsY = 5;        % Number of pixels along Y
+BiasW    = 0;        % Bias to compute weighting potential
+if BiasV == 0
+    BiasW = 1;
+end
 
 
 %%%%%%%%%%%%%%%%%%%%
 % Create PDE model %
 %%%%%%%%%%%%%%%%%%%%
 fprintf('@@@ I''m solving Poisson equation in 2D to calculate the potential @@@\n');
-pdem = createpde(1);
+pdem = createpde('electromagnetic','electrostatic');
 
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -159,13 +163,13 @@ geometryFromEdges(pdem,DecomposedGeom);
 % Apply boundary conditions (only on conductors) %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Boundary of the domain
-applyBoundaryCondition(pdem,'neumann','edge',1:4,'q',0,'g',0);
+electromagneticBC(pdem,'SurfaceCurrentDensity',0,'edge',1:4);
 % Central pixel signal columns
-applyBoundaryCondition(pdem,'dirichlet','edge',5:8,'h',1,'r',BiasW);
+electromagneticBC(pdem,'Voltage',BiasW,'edge',5:8);
 % Other pixels signal columns
-applyBoundaryCondition(pdem,'dirichlet','edge',9:12 + 4*(NPixelsX*NPixelsY-2),'h',1,'r',0);
+electromagneticBC(pdem,'Voltage',0,'edge',9:12 + 4*(NPixelsX*NPixelsY-2));
 % All pixels bias columns
-applyBoundaryCondition(pdem,'dirichlet','edge',13 + 4*(NPixelsX*NPixelsY-2):pdem.Geometry.NumEdges,'h',1,'r',BiasB);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',13 + 4*(NPixelsX*NPixelsY-2):pdem.Geometry.NumEdges);
 
 
 %%%%%%%%%%%%%%%%%
@@ -177,8 +181,10 @@ msh = generateMesh(pdem,'Hmax',MeshMax,'GeometricOrder','quadratic');
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve Poisson equation %
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-specifyCoefficients(pdem,'m',0,'d',0,'c',epsR,'a',0,'f',rho,'face',1);
-Potential = solvepde(pdem);
+pdem.VacuumPermittivity = eps0;
+electromagneticSource(pdem,'face',1,'ChargeDensity',rho);
+electromagneticProperties(pdem,'RelativePermittivity',epsR,'face',1);
+Potential = solve(pdem);
 
 
 fprintf('CPU time --> %.2f [min]\n\n',(cputime-TStart)/60);

@@ -1,34 +1,38 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve Poisson equation to compute the potential %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Bulk    = Bulk thickness [um]
-% PitchX  = Pitch along X [um]
-% BiasB   = Sensor backplane voltage [V] [0 Weighting; -V All]
-% BiasW   = Sensor central strip voltage [V] [1 Weighting; 0 All]
-% epsR    = Relative permittivity
-% rho     = Charge density in the bulk [(Coulomb/um^3) / eps0 [F/um]]
+% Bulk   = Bulk thickness [um]
+% PitchX = Pitch along X [um]
+% BiasV  = Sensor backplane voltage [V] == 0 ? compute weighting field
+% epsR   = Relative permittivity
+% rho    = Charge density in the bulk [(Coulomb/um^3)]
 
-function [pdem,Potential,DecomposedGeom,BulkStart,BulkStop] = StripPlanarDouble_SolvePoisson2D(...
-    Bulk,PitchX,BiasB,BiasW,epsR,rho)
+function [pdem,Potential,DecomposedGeom,BulkStart,BulkStop,VolumeHeight] =...
+    StripPlanarDouble_SolvePoisson2D(Bulk,PitchX,BiasV,epsR,rho)
 TStart = cputime; % CPU time at start
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-MeshMax      = 5;           % Maximum mesh edge length [um]
+eps0         = 8.85e-18;    % Vacuum permittivity [F/um]
 VolumeHeight = 3;           % Volume height [units of bulk thickness]
+MeshMax      = 5;           % Maximum mesh edge length [um]
 MetalThick   = 5;           % Metalization thickness [um]
 MetalWidth   = PitchX-20;   % Metalization width [um]
 BulkStart    = Bulk/2;      % Bulk start coordinate [um]
 BulkStop     = Bulk/2+Bulk; % Bulk stop coordinate [um]
+BiasW        = 0;           % Bias to compute weighting potential
+if BiasV == 0
+    BiasW = 1;
+end
 
 
 %%%%%%%%%%%%%%%%%%%%
 % Create PDE model %
 %%%%%%%%%%%%%%%%%%%%
 fprintf('@@@ I''m solving Poisson equation in 2D to calculate the potential @@@\n');
-pdem = createpde(1);
+pdem = createpde('electromagnetic','electrostatic');
 
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -111,143 +115,143 @@ geometryFromEdges(pdem,DecomposedGeom);
 % Apply boundary conditions (only on conductors) %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Central up-strip
-applyBoundaryCondition(pdem,'dirichlet','edge',4,'h',1,'r',BiasW);
-applyBoundaryCondition(pdem,'dirichlet','edge',6,'h',1,'r',BiasW);
+electromagneticBC(pdem,'Voltage',BiasW,'edge',4);
+electromagneticBC(pdem,'Voltage',BiasW,'edge',6);
 % Positive up-strips
-applyBoundaryCondition(pdem,'dirichlet','edge',23,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',21,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',27,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',25,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',31,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',29,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',35,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',33,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',39,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',37,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',43,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',41,'h',1,'r',0);
+electromagneticBC(pdem,'Voltage',0,'edge',23);
+electromagneticBC(pdem,'Voltage',0,'edge',21);
+electromagneticBC(pdem,'Voltage',0,'edge',27);
+electromagneticBC(pdem,'Voltage',0,'edge',25);
+electromagneticBC(pdem,'Voltage',0,'edge',31);
+electromagneticBC(pdem,'Voltage',0,'edge',29);
+electromagneticBC(pdem,'Voltage',0,'edge',35);
+electromagneticBC(pdem,'Voltage',0,'edge',33);
+electromagneticBC(pdem,'Voltage',0,'edge',39);
+electromagneticBC(pdem,'Voltage',0,'edge',37);
+electromagneticBC(pdem,'Voltage',0,'edge',43);
+electromagneticBC(pdem,'Voltage',0,'edge',41);
 % Negative up-strips
-applyBoundaryCondition(pdem,'dirichlet','edge',47,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',45,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',51,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',49,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',55,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',53,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',59,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',57,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',63,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',61,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',80,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',65,'h',1,'r',0);
+electromagneticBC(pdem,'Voltage',0,'edge',47);
+electromagneticBC(pdem,'Voltage',0,'edge',45);
+electromagneticBC(pdem,'Voltage',0,'edge',51);
+electromagneticBC(pdem,'Voltage',0,'edge',49);
+electromagneticBC(pdem,'Voltage',0,'edge',55);
+electromagneticBC(pdem,'Voltage',0,'edge',53);
+electromagneticBC(pdem,'Voltage',0,'edge',59);
+electromagneticBC(pdem,'Voltage',0,'edge',57);
+electromagneticBC(pdem,'Voltage',0,'edge',63);
+electromagneticBC(pdem,'Voltage',0,'edge',61);
+electromagneticBC(pdem,'Voltage',0,'edge',80);
+electromagneticBC(pdem,'Voltage',0,'edge',65);
 % Top all up-strips
-applyBoundaryCondition(pdem,'dirichlet','edge',14,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',15,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',16,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',17,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',18,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',19,'h',1,'r',0);
+electromagneticBC(pdem,'Voltage',0,'edge',14);
+electromagneticBC(pdem,'Voltage',0,'edge',15);
+electromagneticBC(pdem,'Voltage',0,'edge',16);
+electromagneticBC(pdem,'Voltage',0,'edge',17);
+electromagneticBC(pdem,'Voltage',0,'edge',18);
+electromagneticBC(pdem,'Voltage',0,'edge',19);
 
-applyBoundaryCondition(pdem,'dirichlet','edge',13,'h',1,'r',BiasW);
+electromagneticBC(pdem,'Voltage',BiasW,'edge',13);
 
-applyBoundaryCondition(pdem,'dirichlet','edge',12,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',11,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',10,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',9,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',8,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',7,'h',1,'r',0);
+electromagneticBC(pdem,'Voltage',0,'edge',12);
+electromagneticBC(pdem,'Voltage',0,'edge',11);
+electromagneticBC(pdem,'Voltage',0,'edge',10);
+electromagneticBC(pdem,'Voltage',0,'edge',9);
+electromagneticBC(pdem,'Voltage',0,'edge',8);
+electromagneticBC(pdem,'Voltage',0,'edge',7);
 % Bottom all up-strips
-applyBoundaryCondition(pdem,'dirichlet','edge',96,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',98,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',100,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',102,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',104,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',106,'h',1,'r',0);
+electromagneticBC(pdem,'Voltage',0,'edge',96);
+electromagneticBC(pdem,'Voltage',0,'edge',98);
+electromagneticBC(pdem,'Voltage',0,'edge',100);
+electromagneticBC(pdem,'Voltage',0,'edge',102);
+electromagneticBC(pdem,'Voltage',0,'edge',104);
+electromagneticBC(pdem,'Voltage',0,'edge',106);
 
-applyBoundaryCondition(pdem,'dirichlet','edge',94,'h',1,'r',BiasW);
+electromagneticBC(pdem,'Voltage',BiasW,'edge',94);
 
-applyBoundaryCondition(pdem,'dirichlet','edge',92,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',90,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',88,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',86,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',84,'h',1,'r',0);
-applyBoundaryCondition(pdem,'dirichlet','edge',82,'h',1,'r',0);
+electromagneticBC(pdem,'Voltage',0,'edge',92);
+electromagneticBC(pdem,'Voltage',0,'edge',90);
+electromagneticBC(pdem,'Voltage',0,'edge',88);
+electromagneticBC(pdem,'Voltage',0,'edge',86);
+electromagneticBC(pdem,'Voltage',0,'edge',84);
+electromagneticBC(pdem,'Voltage',0,'edge',82);
 % Top edge
-applyBoundaryCondition(pdem,'dirichlet','edge',1,'h',1,'r',0);
+electromagneticBC(pdem,'Voltage',0,'edge',1);
 % Right edge air
-applyBoundaryCondition(pdem,'neumann','edge',137,'q',0,'g',0);
+electromagneticBC(pdem,'SurfaceCurrentDensity',0,'edge',137);
 % Right edge sensor
-applyBoundaryCondition(pdem,'neumann','edge',136,'q',0,'g',0);
+electromagneticBC(pdem,'SurfaceCurrentDensity',0,'edge',136);
 % Right edge air
-applyBoundaryCondition(pdem,'neumann','edge',135,'q',0,'g',0);
+electromagneticBC(pdem,'SurfaceCurrentDensity',0,'edge',135);
 % Bottom edge
-applyBoundaryCondition(pdem,'dirichlet','edge',2,'h',1,'r',0);
+electromagneticBC(pdem,'Voltage',0,'edge',2);
 % Left edge air
-applyBoundaryCondition(pdem,'neumann','edge',140,'q',0,'g',0);
+electromagneticBC(pdem,'SurfaceCurrentDensity',0,'edge',140);
 % Left edge sensor
-applyBoundaryCondition(pdem,'neumann','edge',139,'q',0,'g',0);
+electromagneticBC(pdem,'SurfaceCurrentDensity',0,'edge',139);
 % Left edge air
-applyBoundaryCondition(pdem,'neumann','edge',138,'q',0,'g',0);
+electromagneticBC(pdem,'SurfaceCurrentDensity',0,'edge',138);
 % Central down-strip
-applyBoundaryCondition(pdem,'dirichlet','edge',3,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',5,'h',1,'r',BiasB);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',3);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',5);
 % Positive down-strips
-applyBoundaryCondition(pdem,'dirichlet','edge',22,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',20,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',26,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',24,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',30,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',28,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',34,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',32,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',38,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',36,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',42,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',40,'h',1,'r',BiasB);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',22);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',20);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',26);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',24);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',30);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',28);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',34);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',32);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',38);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',36);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',42);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',40);
 % Negative down-strips
-applyBoundaryCondition(pdem,'dirichlet','edge',46,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',44,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',50,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',48,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',54,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',52,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',58,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',56,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',62,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',60,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',79,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',64,'h',1,'r',BiasB);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',46);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',44);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',50);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',48);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',54);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',52);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',58);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',56);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',62);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',60);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',79);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',64);
 % Top all down-strips
-applyBoundaryCondition(pdem,'dirichlet','edge',123,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',125,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',127,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',129,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',131,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',133,'h',1,'r',BiasB);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',123);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',125);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',127);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',129);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',131);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',133);
 
-applyBoundaryCondition(pdem,'dirichlet','edge',121,'h',1,'r',BiasB);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',121);
 
-applyBoundaryCondition(pdem,'dirichlet','edge',119,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',117,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',115,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',113,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',111,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',109,'h',1,'r',BiasB);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',119);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',117);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',115);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',113);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',111);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',109);
 % Bottom all down-strips
-applyBoundaryCondition(pdem,'dirichlet','edge',73,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',74,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',75,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',76,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',77,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',78,'h',1,'r',BiasB);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',73);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',74);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',75);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',76);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',77);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',78);
 
-applyBoundaryCondition(pdem,'dirichlet','edge',72,'h',1,'r',BiasB);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',72);
 
-applyBoundaryCondition(pdem,'dirichlet','edge',71,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',70,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',69,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',68,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',67,'h',1,'r',BiasB);
-applyBoundaryCondition(pdem,'dirichlet','edge',66,'h',1,'r',BiasB);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',71);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',70);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',69);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',68);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',67);
+electromagneticBC(pdem,'Voltage',BiasV,'edge',66);
 
 
 %%%%%%%%%%%%%%%%%
@@ -259,10 +263,14 @@ msh = generateMesh(pdem,'Hmax',MeshMax,'GeometricOrder','quadratic');
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Solve Poisson equation %
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-specifyCoefficients(pdem,'m',0,'d',0,'c',1,   'a',0,'f',0,  'face',1); % Air
-specifyCoefficients(pdem,'m',0,'d',0,'c',epsR,'a',0,'f',rho,'face',3); % Sensor
-specifyCoefficients(pdem,'m',0,'d',0,'c',1,   'a',0,'f',0,  'face',2); % Air
-Potential = solvepde(pdem);
+pdem.VacuumPermittivity = eps0;
+electromagneticSource(pdem,'face',1,'ChargeDensity',0);               % Air
+electromagneticProperties(pdem,'RelativePermittivity',1,'face',1);    % Air
+electromagneticSource(pdem,'face',3,'ChargeDensity',rho);             % Sensor
+electromagneticProperties(pdem,'RelativePermittivity',epsR,'face',3); % Sensor
+electromagneticSource(pdem,'face',2,'ChargeDensity',0);               % Air
+electromagneticProperties(pdem,'RelativePermittivity',1,'face',2);    % Air
+Potential = solve(pdem);
 
 
 fprintf('CPU time --> %.2f [min]\n\n',(cputime-TStart)/60);
