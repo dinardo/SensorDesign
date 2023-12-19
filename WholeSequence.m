@@ -1,9 +1,14 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TO DO                                                     %
-% - Review transport equations in magnetic field            %
-% - Define Sensor&Air volumes in SolvePoisson3D_PlanarPixel %
-%   (not available in MATLAB 2016)                          %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TO DO:                                                     %
+% - Move all programs to PDE for electrostatic problems      %
+% - Review workflow up to obtain spectra for all particles (langaus) %
+% - Review transport equations in magnetic field             %
+% PlanarPixel_SolvePoisson3D:                                %
+% - Review geometry                                          %
+% - Define Sensor&Air volumes (not available in MATLAB 2016) %
+% - Rescale WP by 3D/2D                                      %
+% - Compare Landau with testbeam data                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 % Clean up everything
