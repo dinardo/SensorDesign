@@ -39,7 +39,7 @@ TauSe = scale * (1 + ce*Fluence/te)/(ce*Fluence); % Life-time on the strip side 
 TauBh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the backplane side [ns]
 TauSh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the strip side [ns]
 
-Bulk   =   200; % Bulk thickness [um]
+Bulk   =    50; % Bulk thickness [um]
 PitchX =   250; % Pitch along X [um]
 PitchY = 20000; % Pitch along Y [um]
 
