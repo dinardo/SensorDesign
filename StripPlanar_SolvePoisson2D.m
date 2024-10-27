@@ -15,16 +15,15 @@ TStart = cputime; % CPU time at start
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
+NStripLayers = 1;         % Number of strip layers
 eps0         = 8.85e-18;  % Vacuum permittivity [F/um]
 VolumeHeight = 3;         % Volume height [units of bulk thickness]
 MeshMax      = 5;         % Maximum mesh edge length [um]
 MetalThick   = 5;         % Metalization thickness [um]
 MetalWidth   = PitchX-20; % Metalization width [um]
 BulkStart    = 0;         % Bulk start coordinate [um]
-BulkStop     = Bulk;
-%+(NStripLayers-1)*MetalThick; % Bulk stop coordinate [um]
+BulkStop     = Bulk+(NStripLayers-1)*MetalThick; % Bulk stop coordinate [um]
 NStrips      = 13;        % Total number of strips 
-NStripLayers = 1;         % Number of strip layers
 BiasW        = 0;         % Bias to compute weighting potential
 if BiasV == 0
     BiasW = 1;

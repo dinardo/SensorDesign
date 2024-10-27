@@ -25,7 +25,7 @@ clc;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Variable initialization %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-BiasV = -120; % Sensor backplane voltage [V]
+BiasV = -200; % Sensor backplane voltage [V]
 
 Fluence = 0; % Irradiation fluence [10^16 1MeV n.eq./cm^2]
              % 1/tau = c*Fluence/(1 + c*Fluence/t), extracted from fit to data [ns^-1]
@@ -40,8 +40,8 @@ TauBh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the backplane s
 TauSh = scale * (1 + ch*Fluence/th)/(ch*Fluence); % Life-time on the strip side [ns]
 
 Bulk   =    50; % Bulk thickness [um]
-PitchX =   250; % Pitch along X [um]
-PitchY = 20000; % Pitch along Y [um]
+PitchX =   150; % Pitch along X [um]
+PitchY = 10000; % Pitch along Y [um]
 
 qe       = -1.6e-19; % Electron charge [Coulomb]
 eps0     = 8.85e-18; % Vacuum permittivity [F/um]
